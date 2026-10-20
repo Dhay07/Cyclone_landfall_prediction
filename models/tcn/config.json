@@ -1,0 +1,52 @@
+{
+    "model_version": "TCN_BoB_Landfall_v1",
+    "model_type": "TCN",
+    "input_features": [
+        "Lat",
+        "Lon",
+        "direction_from_previous",
+        "WS",
+        "CP",
+        "Month",
+        "Day",
+        "hrs_corrected",
+        "Duration",
+        "Season",
+        "Nearest_lat",
+        "Nearest_lon",
+        "Distance_to_nearest_coast_km",
+        "daysaftermonsoon"
+    ],
+    "target_features": [
+        "Landfall_lat",
+        "Landfall_lon"
+    ],
+    "num_inputs": 14,
+    "channels": [
+        2,
+        4
+    ],
+    "kernel_size": 2,
+    "dilations": [
+        1,
+        2
+    ],
+    "dropout": 0.1,
+    "batch_size": 3,
+    "epochs": 500,
+    "learning_rate": 0.001,
+    "optimizer": "SGD",
+    "momentum": 0.9,
+    "weight_decay": 0.0,
+    "loss_function": "MSELoss",
+    "activation": "sigmoid",
+    "max_lead_steps": 8,
+    "lead_interval_hours": 6,
+    "padding_value": -1.0,
+    "random_seed": 42,
+    "training_cyclones": 25,
+    "testing_cyclones": 11,
+    "training_samples": 202,
+    "testing_samples": 92,
+    "source_dataset": "BoB_cyclones_till_landfall_OND.csv"
+}

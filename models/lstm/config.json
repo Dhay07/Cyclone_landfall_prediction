@@ -1,0 +1,42 @@
+{
+    "model_version": "LSTM_BoB_Landfall_v1",
+    "model_type": "LSTM",
+    "input_features": [
+        "Lat",
+        "Lon",
+        "CP",
+        "WS",
+        "Year",
+        "Month",
+        "Day",
+        "hrs_corrected",
+        "Gradeno",
+        "season"
+    ],
+    "target_features": [
+        "Lat",
+        "Lon"
+    ],
+    "window_size": 2,
+    "lead_time": 2,
+    "interval_hours": 6,
+    "prediction_horizon_hours": 12,
+    "lstm_units": [
+        64,
+        32,
+        16
+    ],
+    "output_units": 2,
+    "activation": "sigmoid",
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "loss": "mse",
+    "epochs": 60,
+    "batch_size": 3,
+    "seed": 23,
+    "training_cyclones": 84,
+    "validation_cyclones": 22,
+    "training_samples": 899,
+    "validation_samples": 240,
+    "source_dataset": "BoB_alltracks_monsoon.csv"
+}
