@@ -255,13 +255,13 @@ if model_choice == "TCN – Landfall Prediction":
                 with col1:
                     st.metric(
                         "Latitude",
-                        f"{result['predicted_lat']:.4f}°"
+                        f"{result['predicted_landfall_lat']:.4f}°"
                     )
 
                 with col2:
                     st.metric(
                         "Longitude",
-                        f"{result['predicted_lon']:.4f}°"
+                        f"{result['predicted_landfall_lon']:.4f}°"
                     )
 
             except Exception as e:
