@@ -241,12 +241,14 @@ if model_choice == "TCN – Landfall Prediction":
                 min_value=1, max_value=31, value=1
             )
 
-            hrs_corrected = add_input(
-                "Hours", "tcn_hours",
-                "Time in hrs (Normally 600 h, 1200 h, 1800 h, 2400 h)",
-                value=600.0, format="%.1f"
+            hours_display = st.selectbox(
+              "Hours",
+              options=[6, 12, 18, 24],
+              format_func=lambda x: f"{x} hours",
+              key="tcn_hours"
             )
-
+            hrs_corrected = float(hours_display * 100)
+            
             duration = add_input(
                 "Duration", "tcn_duration",
                 "Elapsed cyclone time in hours",
