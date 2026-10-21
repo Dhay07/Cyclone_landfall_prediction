@@ -47,7 +47,7 @@ with open(
 def add_input(label, key, explanation, **kwargs):
     """Display a numeric input with an adjacent information popover."""
 
-    input_col, info_col = st.columns([3, 1])
+    input_col, info_col = st.columns([3, 0.5])
 
     with input_col:
         value = st.number_input(
