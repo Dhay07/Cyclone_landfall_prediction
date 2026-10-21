@@ -370,6 +370,7 @@ with tcn_col2:
 
     nearest_lon = add_input(
         "Nearest Coast Longitude (°)",
+        "tcn_nearest_lat"
         "Longitude of the nearest coastline reference point, "
         "in decimal degrees.",
         min_value=-180.0,
