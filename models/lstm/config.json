@@ -1,5 +1,5 @@
 {
-    "model_version": "LSTM_BoB_Landfall_v1",
+    "model_version": "LSTM_BoB_Track_v1",
     "model_type": "LSTM",
     "input_features": [
         "Lat",
