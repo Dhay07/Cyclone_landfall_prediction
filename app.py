@@ -236,7 +236,7 @@ if model_choice == "TCN – Landfall Prediction":
             )
             month = month_ops.index(moonth_display)+1
            
-                day = add_input(
+            day = add_input(
                 "Day", "tcn_day",
                 "Calendar day of the observation, from 1 to 31. "
                 "Ensure the day corresponds to the observation date.",
