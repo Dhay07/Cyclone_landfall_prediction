@@ -439,12 +439,14 @@ else:
 
         with col2:
 
-            month = add_input(
-                "Month", "lstm_month",
-                "Calendar month of the observation: January = 1 "
-                "through December = 12.",
-                min_value=1, max_value=12, value=1
+            month_display = st.selectbox(
+                "Month", "tcn_month",
+                month_ops=[Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sept, Oct, Nov, Dec], 
+                format_func=lambda x: x,
+                key="tcn_month",
+                index=0
             )
+            month = month_ops.index(moonth_display)+1
 
             day = add_input(
                 "Day", "lstm_day",
