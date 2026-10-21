@@ -234,7 +234,7 @@ if model_choice == "TCN – Landfall Prediction":
                 key="tcn_month",
                 index=0
             )
-            month = month_ops.index(moonth_display)+1
+            month = month_ops.index(month_display)+1
            
             day = add_input(
                 "Day", "tcn_day",
@@ -446,7 +446,7 @@ else:
                 key="tcn_month",
                 index=0
             )
-            month = month_ops.index(moonth_display)+1
+            month = month_ops.index(month_display)+1
 
             day = add_input(
                 "Day", "lstm_day",
