@@ -57,7 +57,7 @@ model_choice = st.selectbox(
     "Select Prediction Model",
     [
         "TCN – Landfall Prediction",
-        "LSTM – Landfall Prediction"
+        "LSTM – Track Prediction"
     ]
 )
 
@@ -445,7 +445,7 @@ else:
                 result = predict_lstm(track_df)
 
                 st.subheader(
-                    f"Predicted Landfall "
+                    f"Predicted track "
                     f"({LSTM_CONFIG['prediction_horizon_hours']}-hour horizon)"
                 )
 
