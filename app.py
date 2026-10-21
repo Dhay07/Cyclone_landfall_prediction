@@ -9,7 +9,7 @@ from predict_lstm import predict_landfall as predict_lstm
 
 
 # ============================================================
-# 1. PAGE CONFIGURATION
+# 1. PAGE CONFIGURATION jingunu mani siruchupita nenchula aani
 # ============================================================
 
 st.set_page_config(
