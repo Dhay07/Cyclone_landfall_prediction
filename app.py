@@ -126,9 +126,9 @@ if model_choice == "TCN – Landfall Prediction":
     )
 
     st.info(
-        "Enter cyclone observations sequentially. "
-        "The TCN model uses the required historical track "
-        "and meteorological variables."
+        "Enter/update cyclone observations sequentially at 6 h interval. "
+        "The TCN model uses the given cyclone observations"
+        "to predict landfall."
     )
 
     if "tcn_track_history" not in st.session_state:
@@ -345,6 +345,7 @@ else:
     )
 
     st.info(
+        "Enter/update cyclone observations sequentially at 6 h interval."
         "The LSTM model uses the latest two consecutive "
         "cyclone observations to predict cyclone track "
         "12 hours ahead."
