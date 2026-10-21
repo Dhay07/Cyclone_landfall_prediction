@@ -45,26 +45,21 @@ with open(
 # ============================================================
 
 def add_input(label, key, explanation, **kwargs):
-    """Display the input heading with an adjacent information icon."""
-    heading_col, info_col = st.columns([10, 0.7], gap="small")
+    """Display a numeric input with an adjacent information popover."""
 
-    with heading_col:
-        st.markdown(
-            f"<div style='padding-top: 6px; font-weight: 600;'>{label}</div>",
-            unsafe_allow_html=True
+    input_col, info_col = st.columns([5, 1])
+
+    with input_col:
+        value = st.number_input(
+            label,
+            key=key,
+            **kwargs
         )
 
     with info_col:
         with st.popover("ⓘ", help=f"Information about {label}"):
             st.markdown(f"**{label}**")
             st.write(explanation)
-
-    value = st.number_input(
-        label,
-        key=key,
-        label_visibility="collapsed",
-        **kwargs
-    )
 
     return value
 
@@ -437,7 +432,7 @@ else:
 
             season = add_input(
                 "Season", "lstm_season",
-                "Seasonal category",
+                "Seasonal category ",
                 min_value=1, max_value=4, value=4
             )
 
