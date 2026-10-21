@@ -76,6 +76,11 @@ def show_about():
         for tropical cyclone prediction: Long Short-Term
         Memory (LSTM) and Temporal Convolutional Network
         (TCN).
+        
+        The models were developed using historical cyclone
+        Best Track data from the India Meteorological Department
+        from 1990 to 2023. Some additional variables 
+        such as season, were derived from the cyclone dataset. 
 
         The *LSTM model* predicts the cyclone's track
         12 hours ahead using sequential historical
