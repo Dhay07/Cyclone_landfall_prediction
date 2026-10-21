@@ -57,9 +57,8 @@ def add_input(label, key, explanation, **kwargs):
         )
 
     with info_col:
-        with st.popover("ⓘ", help=f"Information about {label}"):
-            st.markdown(f"**{label}**")
-            st.write(explanation)
+    with st.popover("ⓘ"):
+        st.write(explanation)
 
     return value
 
