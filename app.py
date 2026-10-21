@@ -41,7 +41,31 @@ with open(
 
 
 # ============================================================
-# 3. ABOUT DIALOG
+# 3. INPUT INFORMATION POPOVER
+# ============================================================
+
+def add_input(label, key, explanation, **kwargs):
+    """Display a numeric input with an adjacent information popover."""
+
+    input_col, info_col = st.columns([5, 1])
+
+    with input_col:
+        value = st.number_input(
+            label,
+            key=key,
+            **kwargs
+        )
+
+    with info_col:
+        with st.popover("ⓘ", help=f"Information about {label}"):
+            st.markdown(f"**{label}**")
+            st.write(explanation)
+
+    return value
+
+
+# ============================================================
+# 4. ABOUT DIALOG
 # ============================================================
 
 @st.dialog("About the Prediction Models")
@@ -63,8 +87,12 @@ def show_about():
 
         As the models use different input variables and
         prediction approaches, select a model and provide
-        the corresponding inputs accordingly. 
-        Use Windy or IMD official website to collect input data.
+        the corresponding inputs accordingly.
+
+        Use Windy or the official IMD website to obtain
+        cyclone observations. Ensure that the units,
+        timestamps, and variable definitions match the
+        model's requirements.
 
         ---
 
@@ -80,7 +108,7 @@ def show_about():
 
 
 # ============================================================
-# 4. TITLE
+# 5. TITLE AND ABOUT BUTTON
 # ============================================================
 
 st.title("🌀 Cyclone Landfall Prediction")
@@ -90,13 +118,7 @@ st.write(
     "using machine learning models."
 )
 
-
-# ============================================================
-# 5. ABOUT BUTTON
-# ============================================================
-
 if st.button("ℹ️ About the Models"):
-
     show_about()
 
 
@@ -126,17 +148,13 @@ if model_choice == "TCN – Landfall Prediction":
     )
 
     st.info(
-        "Enter/update cyclone observations sequentially at 6 h interval. "
-        "The TCN model uses the given cyclone observations "
-        "to predict landfall."
+        "Enter or update cyclone observations sequentially "
+        "at 6-hour intervals. The TCN model uses the "
+        "provided observations to predict landfall."
     )
 
     if "tcn_track_history" not in st.session_state:
         st.session_state.tcn_track_history = []
-
-    # --------------------------------------------------------
-    # INPUT FORM
-    # --------------------------------------------------------
 
     with st.form("tcn_form"):
 
@@ -144,100 +162,118 @@ if model_choice == "TCN – Landfall Prediction":
 
         with col1:
 
-            lat = st.number_input(
-                "Latitude",
-                value=15.0,
-                format="%.4f"
+            lat = add_input(
+                "Latitude", "tcn_lat",
+                "Latitude of the cyclone centre in decimal degrees. "
+                "Positive values indicate locations north of the Equator; "
+                "negative values indicate locations south of it.",
+                value=15.0, format="%.4f"
             )
 
-            lon = st.number_input(
-                "Longitude",
-                value=85.0,
-                format="%.4f"
+            lon = add_input(
+                "Longitude", "tcn_lon",
+                "Longitude of the cyclone centre in decimal degrees. "
+                "Use the same longitude convention as your training data.",
+                value=85.0, format="%.4f"
             )
 
-            direction = st.number_input(
-                "Direction from Previous",
-                value=0.0,
-                format="%.4f"
+            direction = add_input(
+                "Direction from Previous", "tcn_direction",
+                "Direction of cyclone movement relative to the previous "
+                "observation. Use the same units and directional convention "
+                "as the model's training dataset.",
+                value=0.0, format="%.4f"
             )
 
-            ws = st.number_input(
-                "Wind Speed",
-                value=40.0,
-                format="%.4f"
+            ws = add_input(
+                "Wind Speed", "tcn_ws",
+                "Maximum sustained wind speed at the observation time. "
+                "Enter it in the same units used during model training.",
+                value=40.0, format="%.4f"
             )
 
-            cp = st.number_input(
-                "Central Pressure",
-                value=1000.0,
-                format="%.4f"
+            cp = add_input(
+                "Central Pressure", "tcn_cp",
+                "Estimated central pressure of the cyclone. Use the same "
+                "pressure units as the model's training data.",
+                value=1000.0, format="%.4f"
             )
 
         with col2:
 
-            month = st.number_input(
-                "Month",
-                min_value=1,
-                max_value=12,
-                value=1
+            month = add_input(
+                "Month", "tcn_month",
+                "Calendar month of the observation: January = 1 through "
+                "December = 12.",
+                min_value=1, max_value=12, value=1
             )
 
-            day = st.number_input(
-                "Day",
-                min_value=1,
-                max_value=31,
-                value=1
+            day = add_input(
+                "Day", "tcn_day",
+                "Calendar day of the observation, from 1 to 31. "
+                "Ensure the day corresponds to the observation date.",
+                min_value=1, max_value=31, value=1
             )
 
-            hrs_corrected = st.number_input(
-                "Hours",
-                value=600.0,
-                format="%.1f"
+            hrs_corrected = add_input(
+                "Hours", "tcn_hours",
+                "The time variable named hrs_corrected in the training "
+                "dataset. Use the same reference time and calculation "
+                "method as the training data; do not enter clock time "
+                "unless that is how the variable was defined.",
+                value=600.0, format="%.1f"
             )
 
-            duration = st.number_input(
-                "Duration",
-                value=0.0,
-                format="%.4f"
+            duration = add_input(
+                "Duration", "tcn_duration",
+                "Cyclone duration variable as defined in the training "
+                "dataset. Use the same time units and reference point.",
+                value=0.0, format="%.4f"
             )
 
-            season = st.number_input(
-                "Season",
-                min_value=1,
-                max_value=4,
-                value=4
+            season = add_input(
+                "Season", "tcn_season",
+                "Seasonal category encoded using the model's training "
+                "convention. Select the category corresponding to the "
+                "observation period; do not assume a different encoding.",
+                min_value=1, max_value=4, value=4
             )
 
         with col3:
 
-            nearest_lat = st.number_input(
-                "Nearest Coast Latitude",
-                value=15.0,
-                format="%.4f"
+            nearest_lat = add_input(
+                "Nearest Coast Latitude", "tcn_nearest_lat",
+                "Latitude of the nearest coastline reference point, "
+                "in decimal degrees. Follow the method used to derive "
+                "this feature during model training.",
+                value=15.0, format="%.4f"
             )
 
-            nearest_lon = st.number_input(
-                "Nearest Coast Longitude",
-                value=85.0,
-                format="%.4f"
+            nearest_lon = add_input(
+                "Nearest Coast Longitude", "tcn_nearest_lon",
+                "Longitude of the nearest coastline reference point, "
+                "in decimal degrees. Follow the method used during "
+                "model training.",
+                value=85.0, format="%.4f"
             )
 
-            distance_coast = st.number_input(
-                "Distance to Nearest Coast (km)",
-                value=100.0,
-                format="%.4f"
+            distance_coast = add_input(
+                "Distance to Nearest Coast (km)", "tcn_distance_coast",
+                "Distance from the cyclone centre to the nearest coastline, "
+                "in kilometres. Use the same distance calculation method "
+                "as the training dataset.",
+                value=100.0, format="%.4f"
             )
 
-            days_monsoon = st.number_input(
-                "Days After Monsoon",
-                value=0.0,
-                format="%.4f"
+            days_monsoon = add_input(
+                "Days After Monsoon", "tcn_days_monsoon",
+                "Number of days relative to the monsoon-onset reference "
+                "used in training. Calculate this using the same onset "
+                "date and sign convention as the training dataset.",
+                value=0.0, format="%.4f"
             )
 
-        submitted = st.form_submit_button(
-            "Add Observation"
-        )
+        submitted = st.form_submit_button("Add Observation")
 
     # --------------------------------------------------------
     # ADD OBSERVATION
@@ -262,9 +298,7 @@ if model_choice == "TCN – Landfall Prediction":
             "daysaftermonsoon": days_monsoon
         }
 
-        st.session_state.tcn_track_history.append(
-            observation
-        )
+        st.session_state.tcn_track_history.append(observation)
 
         st.success(
             f"Observation "
@@ -299,36 +333,28 @@ if model_choice == "TCN – Landfall Prediction":
                 col1, col2 = st.columns(2)
 
                 with col1:
-
                     st.metric(
                         "Latitude",
                         f"{result['predicted_landfall_lat']:.4f}°"
                     )
 
                 with col2:
-
                     st.metric(
                         "Longitude",
                         f"{result['predicted_landfall_lon']:.4f}°"
                     )
 
             except Exception as e:
-
-                st.error(
-                    f"Prediction error: {e}"
-                )
+                st.error(f"Prediction error: {e}")
 
         else:
-
             st.info(
                 "Add at least two observations to generate "
                 "a prediction."
             )
 
         if st.button("Clear TCN Track"):
-
             st.session_state.tcn_track_history = []
-
             st.rerun()
 
 
@@ -345,18 +371,14 @@ else:
     )
 
     st.info(
-        "Enter/update cyclone observations sequentially at 6 h interval. "
-        "The LSTM model uses the latest two consecutive "
-        "cyclone observations to predict cyclone track "
-        "12 hours ahead."
+        "Enter or update cyclone observations sequentially "
+        "at 6-hour intervals. The LSTM model uses the latest "
+        "two consecutive observations to predict the cyclone "
+        "track 12 hours ahead."
     )
 
     if "lstm_track_history" not in st.session_state:
         st.session_state.lstm_track_history = []
-
-    # --------------------------------------------------------
-    # INPUT FORM
-    # --------------------------------------------------------
 
     with st.form("lstm_form"):
 
@@ -364,75 +386,80 @@ else:
 
         with col1:
 
-            lat = st.number_input(
-                "Latitude",
-                value=15.0,
-                format="%.4f"
+            lat = add_input(
+                "Latitude", "lstm_lat",
+                "Latitude of the cyclone centre in decimal degrees. "
+                "Positive values indicate locations north of the Equator.",
+                value=15.0, format="%.4f"
             )
 
-            lon = st.number_input(
-                "Longitude",
-                value=85.0,
-                format="%.4f"
+            lon = add_input(
+                "Longitude", "lstm_lon",
+                "Longitude of the cyclone centre in decimal degrees. "
+                "Use the same longitude convention as the training data.",
+                value=85.0, format="%.4f"
             )
 
-            cp = st.number_input(
-                "Central Pressure",
-                value=1000.0,
-                format="%.4f"
+            cp = add_input(
+                "Central Pressure", "lstm_cp",
+                "Estimated central pressure of the cyclone. Enter the "
+                "same pressure units used in model training.",
+                value=1000.0, format="%.4f"
             )
 
-            ws = st.number_input(
-                "Wind Speed",
-                value=40.0,
-                format="%.4f"
+            ws = add_input(
+                "Wind Speed", "lstm_ws",
+                "Maximum sustained wind speed at the observation time. "
+                "Use the same units as the training dataset.",
+                value=40.0, format="%.4f"
             )
 
-            year = st.number_input(
-                "Year",
-                min_value=1900,
-                max_value=2100,
-                value=2026
+            year = add_input(
+                "Year", "lstm_year",
+                "Calendar year of the observation.",
+                min_value=1900, max_value=2100, value=2026
             )
 
         with col2:
 
-            month = st.number_input(
-                "Month",
-                min_value=1,
-                max_value=12,
-                value=1
+            month = add_input(
+                "Month", "lstm_month",
+                "Calendar month of the observation: January = 1 "
+                "through December = 12.",
+                min_value=1, max_value=12, value=1
             )
 
-            day = st.number_input(
-                "Day",
-                min_value=1,
-                max_value=31,
-                value=1
+            day = add_input(
+                "Day", "lstm_day",
+                "Calendar day of the observation, from 1 to 31.",
+                min_value=1, max_value=31, value=1
             )
 
-            hrs_corrected = st.number_input(
-                "Hours",
-                value=600.0,
-                format="%.1f"
+            hrs_corrected = add_input(
+                "Hours", "lstm_hours",
+                "The hrs_corrected time variable used during training. "
+                "Enter it according to the same reference time and "
+                "calculation method as the training dataset.",
+                value=600.0, format="%.1f"
             )
 
-            gradeno = st.number_input(
-                "Grade Number",
-                value=1.0,
-                format="%.4f"
+            gradeno = add_input(
+                "Grade Number", "lstm_gradeno",
+                "Cyclone grade or intensity category represented by "
+                "the Grade Number variable. Use the category encoding "
+                "adopted in the training dataset.",
+                value=1.0, format="%.4f"
             )
 
-            season = st.number_input(
-                "Season",
-                min_value=1,
-                max_value=4,
-                value=4
+            season = add_input(
+                "Season", "lstm_season",
+                "Seasonal category encoded according to the LSTM "
+                "training convention. Use the correct category for "
+                "the observation period.",
+                min_value=1, max_value=4, value=4
             )
 
-        submitted = st.form_submit_button(
-            "Add Observation"
-        )
+        submitted = st.form_submit_button("Add Observation")
 
     # --------------------------------------------------------
     # ADD OBSERVATION
@@ -453,9 +480,7 @@ else:
             "season": season
         }
 
-        st.session_state.lstm_track_history.append(
-            observation
-        )
+        st.session_state.lstm_track_history.append(observation)
 
         st.success(
             f"Observation "
@@ -493,36 +518,28 @@ else:
                 col1, col2 = st.columns(2)
 
                 with col1:
-
                     st.metric(
                         "Latitude",
                         f"{result['predicted_lat']:.4f}°"
                     )
 
                 with col2:
-
                     st.metric(
                         "Longitude",
                         f"{result['predicted_lon']:.4f}°"
                     )
 
             except Exception as e:
-
-                st.error(
-                    f"Prediction error: {e}"
-                )
+                st.error(f"Prediction error: {e}")
 
         else:
-
             st.info(
                 "Add two observations to generate the "
                 "first LSTM prediction."
             )
 
         if st.button("Clear LSTM Track"):
-
             st.session_state.lstm_track_history = []
-
             st.rerun()
 
 
