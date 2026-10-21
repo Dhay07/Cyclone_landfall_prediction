@@ -346,7 +346,7 @@ else:
 
     st.info(
         "The LSTM model uses the latest two consecutive "
-        "cyclone observations to predict landfall location "
+        "cyclone observations to predict cyclone track "
         "12 hours ahead."
     )
 
