@@ -96,11 +96,12 @@ def show_about():
     ### Model Predictions
 
     - **LSTM — Track Prediction:** Predicts the cyclone's
-      position 12 hours ahead using sequential historical
-      observations.
+      position 12 hours ahead using previously provided recent
+      two sequential input informations.
+
     - **TCN — Landfall Prediction:** Directly estimates the
-      cyclone's landfall location using the observed track
-      and meteorological information provided as input.
+      cyclone's landfall location using all previously provided 
+      input informations.
 
     The models use different input variables and prediction
     approaches. Select the desired model and provide the
