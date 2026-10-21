@@ -290,7 +290,7 @@ if model_choice == "TCN – Landfall Prediction":
 
 else:
 
-    st.subheader("LSTM – Landfall Prediction")
+    st.subheader("LSTM – Track Prediction")
 
     st.caption(
         f"Model version: {LSTM_CONFIG['model_version']}"
