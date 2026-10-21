@@ -70,45 +70,70 @@ def add_input(label, key, explanation, **kwargs):
 @st.dialog("About the Prediction Models")
 def show_about():
 
-    st.markdown(
-        """
-        This application features two deep learning models
-        for tropical cyclone prediction: Long Short-Term
-        Memory (LSTM) and Temporal Convolutional Network
-        (TCN).
-        
-        The models were developed using historical cyclone
-        Best Track data from the India Meteorological Department
-        from 1990 to 2023. Some additional variables 
-        such as season, were derived from the cyclone dataset. 
+    
+	st.markdown(
+    """
+    This application features two deep learning models for
+    tropical cyclone prediction: Long Short-Term Memory (LSTM)
+    and Temporal Convolutional Network (TCN).
 
-        The *LSTM model* predicts the cyclone's track
-        12 hours ahead using sequential historical
-        observations. In contrast, the *sequence-to-one
-        TCN model* directly predicts the cyclone's
-        landfall location from the provided track and
-        meteorological information.
+    ### Data and Methodology
 
-        As the models use different input variables and
-        prediction approaches, select a model and provide
-        the corresponding inputs accordingly.
+    Both models were developed using historical tropical cyclone
+    Best Track data published by the India Meteorological
+    Department (IMD) for the period 1990–2023. Additional
+    variables, such as season, duration, were derived from the 
+    historical records. A seasonal segmentation approach was 
+    adopted during model training to account for seasonal 
+    variations in tropical cyclone characteristics.
 
-        Use Windy or the official IMD website to obtain
-        cyclone observations. Ensure that the units,
-        timestamps, and variable definitions match the
-        model's requirements.
+    The models focus on tropical cyclones over the Bay of Bengal,
+    with particular relevance to the Northeast Monsoon season
+    (October–December), when cyclonic storm activity is frequent
+    in the region. Model performance may vary across seasons
+    and individual cyclones.
 
-        ---
+    ### Model Predictions
 
-        **Disclaimer**
+    - **LSTM — Track Prediction:** Predicts the cyclone's
+      position 12 hours ahead using sequential historical
+      observations.
+    - **TCN — Landfall Prediction:** Directly estimates the
+      cyclone's landfall location using the observed track
+      and meteorological information provided as input.
 
-        This application is intended for educational and
-        research purposes only. Its predictions are not
-        official forecasts or warnings and should not be
-        used as a substitute for guidance from authorized
-        meteorological agencies.
-        """
-    )
+    The models use different input variables and prediction
+    approaches. Select the desired model and provide the
+    corresponding observations according to the specified
+    input requirements.
+
+    ### Data Requirements and Limitations
+
+    - These models do not predict cyclone formation or identify
+      when and where a new cyclone will develop.
+    - At least two consecutive cyclone observations at
+      six-hour intervals are required to generate predictions.
+    - The models are primarily intended for the Bay of Bengal;
+      their performance may vary under different seasonal
+      conditions and cyclone characteristics.
+    - Ensure that all input values, units, timestamps, and
+      variable definitions are consistent with the model
+      requirements.
+
+    Current cyclone observations may be obtained from sources
+    such as [Windy](https://www.windy.com/) and the
+    [India Meteorological Department](https://mausam.imd.gov.in/).
+    
+    ---
+
+    **Disclaimer:** This application is intended for research
+    and educational purposes only. Its predictions are not
+    official forecasts or warnings and must not be used as a
+    substitute for forecasts, advisories, or warnings issued
+    by the IMD or other authorized meteorological agencies.
+    """
+)
+
 
 
 # ============================================================
