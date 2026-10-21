@@ -231,7 +231,7 @@ if model_choice == "TCN – Landfall Prediction":
                 "Month", "tcn_month",
                 month_ops=[Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sept, Oct, Nov, Dec], 
                 format_func=lambda x: x,
-                key="tcn_month"
+                key="tcn_month",
                 index=0
             )
             month = month_ops.index(moonth_display)+1
