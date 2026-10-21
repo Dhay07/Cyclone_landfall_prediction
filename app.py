@@ -164,38 +164,34 @@ if model_choice == "TCN – Landfall Prediction":
 
             lat = add_input(
                 "Latitude", "tcn_lat",
-                "Latitude of the cyclone centre in decimal degrees. "
-                "Positive values indicate locations north of the Equator; "
-                "negative values indicate locations south of it.",
+                "Latitude of the cyclone centre in decimal degrees.",
                 value=15.0, format="%.4f"
             )
 
             lon = add_input(
                 "Longitude", "tcn_lon",
-                "Longitude of the cyclone centre in decimal degrees. "
-                "Use the same longitude convention as your training data.",
+                "Longitude of the cyclone centre in decimal degrees. ",
                 value=85.0, format="%.4f"
             )
 
             direction = add_input(
                 "Direction from Previous", "tcn_direction",
                 "Direction of cyclone movement relative to the previous "
-                "observation. Use the same units and directional convention "
-                "as the model's training dataset.",
+                "observation in degrees.",
                 value=0.0, format="%.4f"
             )
 
             ws = add_input(
                 "Wind Speed", "tcn_ws",
-                "Maximum sustained wind speed at the observation time. "
-                "Enter it in the same units used during model training.",
+                "Maximum sustained wind speed of the cyclone "
+                "at the observation time in knots.",
                 value=40.0, format="%.4f"
             )
 
             cp = add_input(
                 "Central Pressure", "tcn_cp",
-                "Estimated central pressure of the cyclone. Use the same "
-                "pressure units as the model's training data.",
+                "Estimated minimum central pressure of the cyclone "
+                "at the observation time in hPa.",
                 value=1000.0, format="%.4f"
             )
 
@@ -217,25 +213,19 @@ if model_choice == "TCN – Landfall Prediction":
 
             hrs_corrected = add_input(
                 "Hours", "tcn_hours",
-                "The time variable named hrs_corrected in the training "
-                "dataset. Use the same reference time and calculation "
-                "method as the training data; do not enter clock time "
-                "unless that is how the variable was defined.",
+                "Time in hrs (Normally 600 h, 1200 h, 1800 h, 2400 h)",
                 value=600.0, format="%.1f"
             )
 
             duration = add_input(
                 "Duration", "tcn_duration",
-                "Cyclone duration variable as defined in the training "
-                "dataset. Use the same time units and reference point.",
+                "Elapsed cyclone time in hours",
                 value=0.0, format="%.4f"
             )
 
             season = add_input(
                 "Season", "tcn_season",
-                "Seasonal category encoded using the model's training "
-                "convention. Select the category corresponding to the "
-                "observation period; do not assume a different encoding.",
+                "Seasonal category.",
                 min_value=1, max_value=4, value=4
             )
 
@@ -244,32 +234,27 @@ if model_choice == "TCN – Landfall Prediction":
             nearest_lat = add_input(
                 "Nearest Coast Latitude", "tcn_nearest_lat",
                 "Latitude of the nearest coastline reference point, "
-                "in decimal degrees. Follow the method used to derive "
-                "this feature during model training.",
+                "in decimal degrees.",
                 value=15.0, format="%.4f"
             )
 
             nearest_lon = add_input(
                 "Nearest Coast Longitude", "tcn_nearest_lon",
                 "Longitude of the nearest coastline reference point, "
-                "in decimal degrees. Follow the method used during "
-                "model training.",
+                "in decimal degrees.",
                 value=85.0, format="%.4f"
             )
 
             distance_coast = add_input(
                 "Distance to Nearest Coast (km)", "tcn_distance_coast",
                 "Distance from the cyclone centre to the nearest coastline, "
-                "in kilometres. Use the same distance calculation method "
-                "as the training dataset.",
+                "in kilometres. ",
                 value=100.0, format="%.4f"
             )
 
             days_monsoon = add_input(
                 "Days After Monsoon", "tcn_days_monsoon",
-                "Number of days relative to the monsoon-onset reference "
-                "used in training. Calculate this using the same onset "
-                "date and sign convention as the training dataset.",
+                "Number of days between cyclogenesis and monsoon-onset of Kerala.",
                 value=0.0, format="%.4f"
             )
 
@@ -388,29 +373,27 @@ else:
 
             lat = add_input(
                 "Latitude", "lstm_lat",
-                "Latitude of the cyclone centre in decimal degrees. "
-                "Positive values indicate locations north of the Equator.",
+                "Latitude of the cyclone centre in decimal degrees.",
                 value=15.0, format="%.4f"
             )
 
             lon = add_input(
                 "Longitude", "lstm_lon",
-                "Longitude of the cyclone centre in decimal degrees. "
-                "Use the same longitude convention as the training data.",
+                "Longitude of the cyclone centre in decimal degrees.",
                 value=85.0, format="%.4f"
             )
 
             cp = add_input(
                 "Central Pressure", "lstm_cp",
-                "Estimated central pressure of the cyclone. Enter the "
-                "same pressure units used in model training.",
+                "Estimated minimum central pressure of the cyclone "
+                "at the observation time in hPa.",
                 value=1000.0, format="%.4f"
             )
 
             ws = add_input(
                 "Wind Speed", "lstm_ws",
-                "Maximum sustained wind speed at the observation time. "
-                "Use the same units as the training dataset.",
+                "Maximum sustained wind speed  of the cyclone "
+                "at the observation time in knots.",
                 value=40.0, format="%.4f"
             )
 
@@ -437,25 +420,19 @@ else:
 
             hrs_corrected = add_input(
                 "Hours", "lstm_hours",
-                "The hrs_corrected time variable used during training. "
-                "Enter it according to the same reference time and "
-                "calculation method as the training dataset.",
+                "Time in hrs (Normally 600 h, 1200 h, 1800 h, 2400 h). ",
                 value=600.0, format="%.1f"
             )
 
             gradeno = add_input(
                 "Grade Number", "lstm_gradeno",
-                "Cyclone grade or intensity category represented by "
-                "the Grade Number variable. Use the category encoding "
-                "adopted in the training dataset.",
+                "Cyclone grade or intensity category defined by IMD",
                 value=1.0, format="%.4f"
             )
 
             season = add_input(
                 "Season", "lstm_season",
-                "Seasonal category encoded according to the LSTM "
-                "training convention. Use the correct category for "
-                "the observation period.",
+                "Seasonal category",
                 min_value=1, max_value=4, value=4
             )
 
