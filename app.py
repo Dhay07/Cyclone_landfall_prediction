@@ -256,9 +256,8 @@ st.text_input(
 )
 
 st.caption(
-    "The date defaults to the current Indian Standard Time date. "
-    "Change it when entering historical observations. The day "
-    "dropdown adjusts to the selected month and year."
+    "Refer IMD notification to select the time (UTC) "
+    "and current cyclone postion (decimal degreees)."
 )
 
 st.subheader("Shared Cyclone Parameters")
