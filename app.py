@@ -57,7 +57,7 @@ def show_about():
         The *LSTM model* predicts the cyclone's track
         12 hours ahead using sequential historical
         observations. In contrast, the *sequence-to-one
-        TCN model* directly estimates the cyclone's
+        TCN model* directly predicts the cyclone's
         landfall location from the provided track and
         meteorological information.
 
