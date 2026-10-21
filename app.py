@@ -229,13 +229,14 @@ if model_choice == "TCN – Landfall Prediction":
 
             month_display = st.selectbox(
                 "Month",
-                month_ops=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
+                options=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
                 "Aug", "Sept", "Oct", "Nov", "Dec"], 
                 format_func=lambda x: x,
                 key="tcn_month",
                 index=0
             )
-            month = month_ops.index(month_display)+1
+            month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
+                "Aug", "Sept", "Oct", "Nov", "Dec"].index(month_display)+1
            
             day = add_input(
                 "Day", "tcn_day",
@@ -442,13 +443,14 @@ else:
 
             month_display = st.selectbox(
                 "Month",
-                month_ops=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
+                options=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
                 "Aug", "Sept", "Oct", "Nov", "Dec"], 
                 format_func=lambda x: x,
                 key="tcn_month",
                 index=0
             )
-            month = month_ops.index(month_display)+1
+            month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", 
+                "Aug", "Sept", "Oct", "Nov", "Dec"].index(month_display)+1
 
             day = add_input(
                 "Day", "lstm_day",
@@ -456,11 +458,13 @@ else:
                 min_value=1, max_value=31, value=1
             )
 
-            hrs_corrected = add_input(
-                "Hours", "lstm_hours",
-                "Time in hrs (Normally 600 h, 1200 h, 1800 h, 2400 h). ",
-                value=600.0, format="%.1f"
+            hours_display = st.selectbox(
+              "Hours (24 h format)",
+              options=[6, 12, 18, 24],
+              format_func=lambda x: f"{x}",
+              key="tcn_hours"
             )
+            hrs_corrected = float(hours_display * 100)
 
             gradeno = add_input(
                 "Grade Number", "lstm_gradeno",
