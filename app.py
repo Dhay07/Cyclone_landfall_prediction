@@ -227,14 +227,16 @@ if model_choice == "TCN – Landfall Prediction":
 
         with col2:
 
-            month = add_input(
+            month_display = st.selectbox(
                 "Month", "tcn_month",
-                "Calendar month of the observation: January = 1 through "
-                "December = 12.",
-                min_value=1, max_value=12, value=1
+                month_ops=[Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sept, Oct, Nov, Dec], 
+                format_func=lambda x: x,
+                key="tcn_month"
+                index=0
             )
-
-            day = add_input(
+            month = month_ops.index(moonth_display)+1
+           
+                day = add_input(
                 "Day", "tcn_day",
                 "Calendar day of the observation, from 1 to 31. "
                 "Ensure the day corresponds to the observation date.",
@@ -242,9 +244,9 @@ if model_choice == "TCN – Landfall Prediction":
             )
 
             hours_display = st.selectbox(
-              "Hours",
+              "Hours (24 h format)",
               options=[6, 12, 18, 24],
-              format_func=lambda x: f"{x} hours",
+              format_func=lambda x: f"{x}",
               key="tcn_hours"
             )
             hrs_corrected = float(hours_display * 100)
