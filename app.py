@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import json
@@ -8,7 +9,7 @@ from predict_lstm import predict_landfall as predict_lstm
 
 
 # ============================================================
-# Page configuration
+# 1. PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -19,26 +20,67 @@ st.set_page_config(
 
 
 # ============================================================
-# Load configurations
+# 2. LOAD CONFIGURATIONS
 # ============================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 with open(
     os.path.join(BASE_DIR, "models", "tcn", "config.json"),
-    "r"
+    "r",
+    encoding="utf-8"
 ) as f:
     TCN_CONFIG = json.load(f)
 
 with open(
     os.path.join(BASE_DIR, "models", "lstm", "config.json"),
-    "r"
+    "r",
+    encoding="utf-8"
 ) as f:
     LSTM_CONFIG = json.load(f)
 
 
 # ============================================================
-# Title
+# 3. ABOUT DIALOG
+# ============================================================
+
+@st.dialog("About the Prediction Models")
+def show_about():
+
+    st.markdown(
+        """
+        This application features two deep learning models
+        for tropical cyclone prediction: Long Short-Term
+        Memory (LSTM) and Temporal Convolutional Network
+        (TCN).
+
+        The **LSTM model** predicts the cyclone's track
+        12 hours ahead using sequential historical
+        observations. In contrast, the **sequence-to-one
+        TCN model** directly estimates the cyclone's
+        landfall location from the provided track and
+        meteorological information.
+
+        As the models use different input variables and
+        prediction approaches, select a model and provide
+        the corresponding inputs accordingly. Use Windy or
+	IMD official website to collect input data.
+
+        ---
+
+        **Disclaimer**
+
+        This application is intended for educational and
+        research purposes only. Its predictions are not
+        official forecasts or warnings and should not be
+        used as a substitute for guidance from authorized
+        meteorological agencies.
+        """
+    )
+
+
+# ============================================================
+# 4. TITLE
 # ============================================================
 
 st.title("🌀 Cyclone Landfall Prediction")
@@ -50,7 +92,16 @@ st.write(
 
 
 # ============================================================
-# Model selection
+# 5. ABOUT BUTTON
+# ============================================================
+
+if st.button("ℹ️ About the Models"):
+
+    show_about()
+
+
+# ============================================================
+# 6. MODEL SELECTION
 # ============================================================
 
 model_choice = st.selectbox(
@@ -63,7 +114,7 @@ model_choice = st.selectbox(
 
 
 # ============================================================
-# TCN MODEL
+# 7. TCN MODEL
 # ============================================================
 
 if model_choice == "TCN – Landfall Prediction":
@@ -80,15 +131,11 @@ if model_choice == "TCN – Landfall Prediction":
         "and meteorological variables."
     )
 
-    # --------------------------------------------------------
-    # Session state
-    # --------------------------------------------------------
-
     if "tcn_track_history" not in st.session_state:
         st.session_state.tcn_track_history = []
 
     # --------------------------------------------------------
-    # Input form
+    # INPUT FORM
     # --------------------------------------------------------
 
     with st.form("tcn_form"):
@@ -96,6 +143,7 @@ if model_choice == "TCN – Landfall Prediction":
         col1, col2, col3 = st.columns(3)
 
         with col1:
+
             lat = st.number_input(
                 "Latitude",
                 value=15.0,
@@ -127,6 +175,7 @@ if model_choice == "TCN – Landfall Prediction":
             )
 
         with col2:
+
             month = st.number_input(
                 "Month",
                 min_value=1,
@@ -161,6 +210,7 @@ if model_choice == "TCN – Landfall Prediction":
             )
 
         with col3:
+
             nearest_lat = st.number_input(
                 "Nearest Coast Latitude",
                 value=15.0,
@@ -190,7 +240,7 @@ if model_choice == "TCN – Landfall Prediction":
         )
 
     # --------------------------------------------------------
-    # Add observation
+    # ADD OBSERVATION
     # --------------------------------------------------------
 
     if submitted:
@@ -222,7 +272,7 @@ if model_choice == "TCN – Landfall Prediction":
         )
 
     # --------------------------------------------------------
-    # Display observations
+    # DISPLAY OBSERVATIONS AND PREDICT
     # --------------------------------------------------------
 
     if st.session_state.tcn_track_history:
@@ -238,10 +288,6 @@ if model_choice == "TCN – Landfall Prediction":
             use_container_width=True
         )
 
-        # ----------------------------------------------------
-        # Prediction
-        # ----------------------------------------------------
-
         if len(track_df) >= 2:
 
             try:
@@ -253,12 +299,14 @@ if model_choice == "TCN – Landfall Prediction":
                 col1, col2 = st.columns(2)
 
                 with col1:
+
                     st.metric(
                         "Latitude",
                         f"{result['predicted_landfall_lat']:.4f}°"
                     )
 
                 with col2:
+
                     st.metric(
                         "Longitude",
                         f"{result['predicted_landfall_lon']:.4f}°"
@@ -285,7 +333,7 @@ if model_choice == "TCN – Landfall Prediction":
 
 
 # ============================================================
-# LSTM MODEL
+# 8. LSTM MODEL
 # ============================================================
 
 else:
@@ -302,15 +350,11 @@ else:
         "12 hours ahead."
     )
 
-    # --------------------------------------------------------
-    # Session state
-    # --------------------------------------------------------
-
     if "lstm_track_history" not in st.session_state:
         st.session_state.lstm_track_history = []
 
     # --------------------------------------------------------
-    # Input form
+    # INPUT FORM
     # --------------------------------------------------------
 
     with st.form("lstm_form"):
@@ -390,7 +434,7 @@ else:
         )
 
     # --------------------------------------------------------
-    # Add observation
+    # ADD OBSERVATION
     # --------------------------------------------------------
 
     if submitted:
@@ -418,7 +462,7 @@ else:
         )
 
     # --------------------------------------------------------
-    # Display observations
+    # DISPLAY OBSERVATIONS AND PREDICT
     # --------------------------------------------------------
 
     if st.session_state.lstm_track_history:
@@ -434,10 +478,6 @@ else:
             use_container_width=True
         )
 
-        # ----------------------------------------------------
-        # LSTM prediction
-        # ----------------------------------------------------
-
         if len(track_df) >= LSTM_CONFIG["window_size"]:
 
             try:
@@ -445,19 +485,21 @@ else:
                 result = predict_lstm(track_df)
 
                 st.subheader(
-                    f"Predicted track "
+                    f"Predicted Track "
                     f"({LSTM_CONFIG['prediction_horizon_hours']}-hour horizon)"
                 )
 
                 col1, col2 = st.columns(2)
 
                 with col1:
+
                     st.metric(
                         "Latitude",
                         f"{result['predicted_lat']:.4f}°"
                     )
 
                 with col2:
+
                     st.metric(
                         "Longitude",
                         f"{result['predicted_lon']:.4f}°"
@@ -484,7 +526,7 @@ else:
 
 
 # ============================================================
-# Disclaimer
+# 9. DISCLAIMER
 # ============================================================
 
 st.divider()
