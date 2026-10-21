@@ -64,7 +64,7 @@ def show_about():
         As the models use different input variables and
         prediction approaches, select a model and provide
         the corresponding inputs accordingly. Use Windy or
-	IMD official website to collect input data.
+        IMD official website to collect input data.
 
         ---
 
