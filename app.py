@@ -54,17 +54,17 @@ def show_about():
         Memory (LSTM) and Temporal Convolutional Network
         (TCN).
 
-        The **LSTM model** predicts the cyclone's track
+        The *LSTM model* predicts the cyclone's track
         12 hours ahead using sequential historical
-        observations. In contrast, the **sequence-to-one
-        TCN model** directly estimates the cyclone's
+        observations. In contrast, the *sequence-to-one
+        TCN model* directly estimates the cyclone's
         landfall location from the provided track and
         meteorological information.
 
         As the models use different input variables and
         prediction approaches, select a model and provide
-        the corresponding inputs accordingly. Use Windy or
-        IMD official website to collect input data.
+        the corresponding inputs accordingly. 
+        Use Windy or IMD official website to collect input data.
 
         ---
 
