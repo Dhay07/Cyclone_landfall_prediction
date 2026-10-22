@@ -318,17 +318,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.caption(
-    "The date defaults to the current date. "
-    "Change if necessary. Refer IMD notification to get " 
-    "cyclone informations at selected observation time in UTC"
-)
-
-
-# ============================================================
-# SHARED CYCLONE PARAMETERS AND LSTM GRADE
-# ============================================================
-
 # ============================================================
 # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
 # ============================================================
@@ -346,6 +335,12 @@ with time_col:
 
     # Convert displayed hours to the model's expected representation.
     hrs_corrected = float(hours_display * 100)
+
+st.caption(
+    "The date defaults to the current date. "
+    "Change if necessary. Refer IMD bulletin to obtain " 
+    "cyclone informations for the selected observation time (UTC)"
+)
 
 common_col1, common_col2, common_col3 = st.columns(3)
 
@@ -392,14 +387,25 @@ with common_col2:
     )
 
 with common_col3:
-    gradeno = add_input(
-        "Grade Number",
-        "lstm_gradeno",
-        "Cyclone grade or intensity category as defined in "
-        "the LSTM training data.",
-        value=1.0,
-        format="%.4f"
-    )
+    # Automatically determine Grade Number from wind speed (knots)
+    if 17 <= ws <= 27:
+        gradeno = 1
+    elif 28 <= ws <= 33:
+        gradeno = 2
+    elif 34 <= ws <= 47:
+        gradeno = 3
+    elif 48 <= ws <= 63:
+        gradeno = 4
+    elif 64 <= ws <= 89:
+        gradeno = 5
+    elif 90 <= ws <= 119:
+        gradeno = 6
+    elif ws >= 120:
+        gradeno = 7
+    else:
+        gradeno = 0
+
+    st.metric("Cyclone category", gradeno)
 
     st.metric(
         "Selected observation date",
