@@ -133,11 +133,11 @@ def add_input(label, key, explanation, **kwargs):
 # ============================================================
 
 # Set COASTLINE_PATH to your coastline file, or place the file at
-# <app folder>/data/coastline.geojson. GeoJSON, Shapefile (.shp), and
+# <app folder>/data/coastline.shp. GeoJSON, Shapefile (.shp), and
 # other vector formats supported by GeoPandas can be used.
 COASTLINE_PATH = os.environ.get(
     "COASTLINE_PATH",
-    os.path.join(BASE_DIR, "data", "coastline.geojson")
+    os.path.join(BASE_DIR, "data", "coastline.shp")
 )
 
 
