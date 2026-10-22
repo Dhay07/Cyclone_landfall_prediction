@@ -418,7 +418,34 @@ with common_col3:
     }
 
     st.metric("Grade Number", gradeno)
-    st.caption(f"Cyclone Category: {grade_names[gradeno]}")
+
+    st.markdown(
+             f"""
+    <div style="
+        background-color: #EAF2F8;
+        border-left: 5px solid #2874A6;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 5px;
+        margin-bottom: 12px;
+        text-align: center;
+    ">
+        <div style="
+            font-size: 12px;
+            color: #526575;
+            font-weight: 600;
+            margin-bottom: 4px;
+        ">CYCLONE CATEGORY</div>
+        <div style="
+            font-size: 16px;
+            color: #1B4F72;
+            font-weight: 700;
+        ">{grade_names[gradeno]}</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
+
 
     st.metric(
         "Selected observation date",
