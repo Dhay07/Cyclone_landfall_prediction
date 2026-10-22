@@ -328,8 +328,30 @@ st.caption(
 # SHARED CYCLONE PARAMETERS AND LSTM GRADE
 # ============================================================
 
-# No separate "Cyclone Parameters" subheading.
-# The LSTM Grade Number is integrated into the same input area.
+# ============================================================
+# OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
+# ============================================================
+
+time_col, time_info_col = st.columns([1, 3])
+
+with time_col:
+    hours_display = st.selectbox(
+        "Time (UTC)",
+        options=[6, 12, 18, 24],
+        index=0,
+        format_func=lambda x: f"{x:02d}:00",
+        key="obs_hours"
+    )
+
+    # Convert displayed hours to the model's expected representation.
+    hrs_corrected = float(hours_display * 100)
+
+with time_info_col:
+    st.caption(
+        "Refer IMD notification to get cyclone informations at selected"
+        " observation time in UTC"
+    )
+
 
 common_col1, common_col2, common_col3 = st.columns(3)
 
@@ -390,30 +412,6 @@ with common_col3:
         f"{day:02d} {month_display} {year}"
     )
 
-
-# ============================================================
-# OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
-# ============================================================
-
-time_col, time_info_col = st.columns([1, 3])
-
-with time_col:
-    hours_display = st.selectbox(
-        "Time (UTC)",
-        options=[6, 12, 18, 24],
-        index=0,
-        format_func=lambda x: f"{x:02d}:00",
-        key="obs_hours"
-    )
-
-    # Convert displayed hours to the model's expected representation.
-    hrs_corrected = float(hours_display * 100)
-
-with time_info_col:
-    st.caption(
-        "Refer IMD notification to get cyclone informations at selected"
-        " observation time in UTC"
-    )
 
 # ============================================================
 # 9. TCN-SPECIFIC INPUTS
