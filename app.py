@@ -386,7 +386,6 @@ with common_col2:
         format="%.4f"
     )
 
-```python
 with common_col3:
     # Automatically calculate Grade Number from wind speed (knots)
     if 17 <= ws <= 27:
@@ -425,8 +424,6 @@ with common_col3:
         "Selected observation date",
         f"{day:02d} {month_display} {year}"
     )
-```
-
 
 # ============================================================
 # 9. TCN-SPECIFIC INPUTS
