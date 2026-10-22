@@ -3,12 +3,39 @@ import pandas as pd
 import json
 import os
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import math
+
+# Optional geospatial dependencies are required for automatic coastline features.
+try:
+    import geopandas as gpd
+    from pyproj import CRS
+    from shapely.geometry import Point
+    from shapely.ops import nearest_points
+    GEOSPATIAL_IMPORT_ERROR = None
+except ImportError as exc:
+    gpd = None
+    CRS = None
+    Point = None
+    nearest_points = None
+    GEOSPATIAL_IMPORT_ERROR = str(exc)
 
 from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
+from pathlib import Path
+import geopandas as gpd
 
+BASE_DIR = Path(__file__).resolve().parent
+COASTLINE_PATH = BASE_DIR / "data" / "coastline.shp"
+
+coastline = gpd.read_file(COASTLINE_PATH)
+
+if coastline.crs is None:
+    raise ValueError(
+        "Coastline data has no CRS. "
+        "Check the coastline.prj file."
+    )
 
 # ============================================================
 # 1. PAGE CONFIGURATION
@@ -102,6 +129,104 @@ def add_input(label, key, explanation, **kwargs):
 
 
 # ============================================================
+# AUTOMATED TCN FEATURE HELPERS
+# ============================================================
+
+# Set COASTLINE_PATH to your coastline file, or place the file at
+# <app folder>/data/coastline.geojson. GeoJSON, Shapefile (.shp), and
+# other vector formats supported by GeoPandas can be used.
+COASTLINE_PATH = os.environ.get(
+    "COASTLINE_PATH",
+    os.path.join(BASE_DIR, "data", "coastline.geojson")
+)
+
+
+@st.cache_resource
+def load_coastline_data(path, modified_time):
+    """Load coastline vector data and normalize it to longitude/latitude."""
+    if gpd is None:
+        return None, (
+            "Automatic coastline calculations require geopandas, shapely, "
+            "and pyproj. Install them with: pip install geopandas shapely pyproj."
+        )
+    if not os.path.exists(path):
+        return None, (
+            f"Coastline file not found: {path}. Set COASTLINE_PATH or place "
+            "your coastline file at data/coastline.geojson."
+        )
+    try:
+        coast = gpd.read_file(path)
+        if coast.empty:
+            return None, "The coastline dataset contains no features."
+        if coast.crs is None:
+            return None, (
+                "The coastline dataset has no declared CRS. Define its actual "
+                "coordinate reference system before using it."
+            )
+        coast = coast.to_crs("EPSG:4326")
+        coast = coast.loc[coast.geometry.notna() & ~coast.geometry.is_empty]
+        if coast.empty:
+            return None, "The coastline dataset has no usable geometries."
+        return coast, None
+    except Exception as exc:
+        return None, f"Could not read coastline dataset: {exc}"
+
+
+def calculate_bearing(lat1, lon1, lat2, lon2):
+    """Initial great-circle bearing from the previous point to the current point.
+
+    Returns degrees clockwise from true north in the range [0, 360).
+    Confirm that this is the same direction convention used in TCN training.
+    """
+    if math.isclose(lat1, lat2, abs_tol=1e-12) and math.isclose(
+        lon1, lon2, abs_tol=1e-12
+    ):
+        return 0.0
+
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    delta_lon = math.radians(lon2 - lon1)
+    x = math.sin(delta_lon) * math.cos(phi2)
+    y = (
+        math.cos(phi1) * math.sin(phi2)
+        - math.sin(phi1) * math.cos(phi2) * math.cos(delta_lon)
+    )
+    return (math.degrees(math.atan2(x, y)) + 360.0) % 360.0
+
+
+def find_nearest_coast(lat, lon, coastline):
+    """Return (nearest coastline latitude, longitude, distance in km).
+
+    A local azimuthal-equidistant projection is used so distance is measured
+    in metres rather than degrees. A local geographic window speeds up the
+    calculation for global coastline datasets.
+    """
+    if coastline is None or coastline.empty:
+        raise ValueError("Coastline data is not loaded.")
+
+    # Use nearby coastline features when available; otherwise use the full set.
+    local = coastline.cx[lon - 15:lon + 15, lat - 15:lat + 15]
+    if local.empty:
+        local = coastline
+
+    local_crs = CRS.from_proj4(
+        f"+proj=aeqd +lat_0={lat} +lon_0={lon} "
+        "+datum=WGS84 +units=m +no_defs"
+    )
+    cyclone_point = gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326").to_crs(local_crs).iloc[0]
+    coast_projected = local.to_crs(local_crs)
+    coast_union = coast_projected.geometry.unary_union
+    _, nearest_point = nearest_points(cyclone_point, coast_union)
+    distance_km = cyclone_point.distance(nearest_point) / 1000.0
+    nearest_lonlat = gpd.GeoSeries([nearest_point], crs=local_crs).to_crs("EPSG:4326").iloc[0]
+    return float(nearest_lonlat.y), float(nearest_lonlat.x), float(distance_km)
+
+
+def make_observation_datetime(year, month, day, hour_utc):
+    """Build a UTC timestamp; the UI's 24:00 option rolls to next-day 00:00."""
+    return datetime(year, month, day) + timedelta(hours=int(hour_utc))
+
+
+# ============================================================
 # 5. ABOUT DIALOG
 # ============================================================
 
@@ -144,6 +269,8 @@ def show_about():
       for the predictions.
     - Predictions depend on the accuracy and consistency of
       the supplied observations.
+    - Automated TCN coastline features require a georeferenced coastline
+      vector dataset; direction calculations must match the training convention.
     - The models are primarily intended for the Bay of Bengal;
       performance may vary across cyclones and seasons.
 
@@ -187,6 +314,13 @@ if "tcn_track_history" not in st.session_state:
 
 if "lstm_track_history" not in st.session_state:
     st.session_state.lstm_track_history = []
+
+# Timestamps are stored separately so no helper columns are added to the
+# DataFrame passed into the trained TCN model.
+if "tcn_first_observation_datetime" not in st.session_state:
+    st.session_state.tcn_first_observation_datetime = None
+if "tcn_last_observation_datetime" not in st.session_state:
+    st.session_state.tcn_last_observation_datetime = None
 
 
 # ============================================================
@@ -460,69 +594,21 @@ st.divider()
 st.header("Additional Inputs for TCN")
 
 st.caption(
-    "These variables are used by the TCN model only. "
-    "They do not replace or modify the shared inputs."
+    "Direction, duration, and nearest-coast features are calculated "
+    "automatically when an observation is added. Days After Monsoon Onset "
+    "remains a manual input."
 )
 
-tcn_col1, tcn_col2, tcn_col3 = st.columns(3)
+tcn_col1, tcn_col2 = st.columns(2)
 
 with tcn_col1:
-    direction = add_input(
-        "Direction from Previous (degrees)",
-        "tcn_direction",
-        "Direction of cyclone movement relative to the previous "
-        "observation, in degrees. Use the same convention as "
-        "the TCN training data.",
-        min_value=0.0,
-        max_value=360.0,
-        value=0.0,
-        format="%.4f"
-    )
-
-    duration = add_input(
-        "Duration (hours)",
-        "tcn_duration",
-        "Elapsed cyclone duration in hours, using the same "
-        "definition as the TCN training data.",
-        min_value=0.0,
-        value=0.0,
-        format="%.4f"
-    )
+    st.markdown("**Calculated automatically**")
+    st.write("- Direction from previous observation")
+    st.write("- Duration since the first observation entered")
+    st.write("- Nearest coastline latitude and longitude")
+    st.write("- Distance to nearest coastline")
 
 with tcn_col2:
-    nearest_lat = add_input(
-        "Nearest Coast Latitude (°)",
-        "tcn_nearest_lat",
-        "Latitude of the nearest coastline reference point, "
-        "in decimal degrees.",
-        min_value=-90.0,
-        max_value=90.0,
-        value=15.0,
-        format="%.4f"
-    )
-
-    nearest_lon = add_input(
-        "Nearest Coast Longitude (°)",
-        "tcn_nearest_lon",
-        "Longitude of the nearest coastline reference point, "
-        "in decimal degrees.",
-        min_value=-180.0,
-        max_value=180.0,
-        value=85.0,
-        format="%.4f"
-    )
-
-with tcn_col3:
-    distance_coast = add_input(
-        "Distance to Nearest Coast (km)",
-        "tcn_distance_coast",
-        "Distance from the cyclone centre to the nearest coastline, "
-        "in kilometres.",
-        min_value=0.0,
-        value=100.0,
-        format="%.4f"
-    )
-
     days_monsoon = add_input(
         "Days After Monsoon Onset",
         "tcn_days_monsoon",
@@ -532,6 +618,18 @@ with tcn_col3:
         value=0.0,
         format="%.4f"
     )
+
+# Load the coastline data once and cache it. The dataset must have a valid CRS.
+try:
+    _coast_mtime = os.path.getmtime(COASTLINE_PATH) if os.path.exists(COASTLINE_PATH) else 0
+except OSError:
+    _coast_mtime = 0
+COASTLINE_GDF, COASTLINE_LOAD_ERROR = load_coastline_data(
+    COASTLINE_PATH, _coast_mtime
+)
+if COASTLINE_LOAD_ERROR:
+    st.warning(COASTLINE_LOAD_ERROR)
+
 
 # ============================================================
 # 11. ADD OBSERVATION
@@ -546,10 +644,6 @@ submitted = st.button(
 )
 
 if submitted:
-
-    # Validate the selected date.
-    # The day dropdown is constrained by month/year, but this
-    # check protects against inconsistent widget state.
     days_in_month = calendar.monthrange(year, month)[1]
 
     if not 1 <= day <= days_in_month:
@@ -557,55 +651,105 @@ if submitted:
             f"Invalid date: {month_display} {year} has "
             f"{days_in_month} days. Please select a valid date."
         )
-
-    else:
-
-        # ----------------------------------------------------
-        # Prepare TCN input independently
-        # ----------------------------------------------------
-
-        tcn_observation = {
-            "Lat": lat,
-            "Lon": lon,
-            "direction_from_previous": direction,
-            "WS": ws,
-            "CP": cp,
-            "Month": month,
-            "Day": day,
-            "hrs_corrected": hrs_corrected,
-            "Duration": duration,
-            "Season": season,
-            "Nearest_lat": nearest_lat,
-            "Nearest_lon": nearest_lon,
-            "Distance_to_nearest_coast_km": distance_coast,
-            "daysaftermonsoon": days_monsoon
-        }
-
-        # ----------------------------------------------------
-        # Prepare LSTM input independently
-        # ----------------------------------------------------
-
-        lstm_observation = {
-            "Lat": lat,
-            "Lon": lon,
-            "CP": cp,
-            "WS": ws,
-            "Year": year,
-            "Month": month,
-            "Day": day,
-            "hrs_corrected": hrs_corrected,
-            "Gradeno": gradeno,
-            "season": season
-        }
-
-        # Save the same observation separately for each model.
-        st.session_state.tcn_track_history.append(tcn_observation)
-        st.session_state.lstm_track_history.append(lstm_observation)
-
-        st.success(
-            f"Observation added for {day:02d} {month_display} "
-            f"{year}, {hours_display:02d}:00."
+    elif COASTLINE_GDF is None:
+        st.error(
+            "TCN observation was not added because the coastline data could "
+            "not be loaded. Fix the coastline path/format and try again."
         )
+    else:
+        observation_dt = make_observation_datetime(year, month, day, hours_display)
+        previous_dt = st.session_state.tcn_last_observation_datetime
+        first_dt = st.session_state.tcn_first_observation_datetime
+
+        # The track is expected to be entered in chronological order because
+        # both direction and duration depend on observation order/time.
+        if previous_dt is not None and observation_dt <= previous_dt:
+            st.error(
+                "Please add observations in strictly increasing UTC time order. "
+                "The selected timestamp must be later than the previous TCN observation."
+            )
+        else:
+            try:
+                # Direction is 0 for the first point because no previous position exists.
+                if st.session_state.tcn_track_history:
+                    previous_observation = st.session_state.tcn_track_history[-1]
+                    direction = calculate_bearing(
+                        float(previous_observation["Lat"]),
+                        float(previous_observation["Lon"]),
+                        float(lat),
+                        float(lon),
+                    )
+                else:
+                    direction = 0.0
+
+                # Duration is measured from the first observation entered into
+                # the TCN history, not from the app's current session start.
+                duration = (
+                    0.0 if first_dt is None
+                    else (observation_dt - first_dt).total_seconds() / 3600.0
+                )
+
+                nearest_lat, nearest_lon, distance_coast = find_nearest_coast(
+                    float(lat), float(lon), COASTLINE_GDF
+                )
+
+                # ----------------------------------------------------
+                # Prepare TCN input independently. Keep the exact model
+                # feature names unchanged.
+                # ----------------------------------------------------
+                tcn_observation = {
+                    "Lat": lat,
+                    "Lon": lon,
+                    "direction_from_previous": direction,
+                    "WS": ws,
+                    "CP": cp,
+                    "Month": month,
+                    "Day": day,
+                    "hrs_corrected": hrs_corrected,
+                    "Duration": duration,
+                    "Season": season,
+                    "Nearest_lat": nearest_lat,
+                    "Nearest_lon": nearest_lon,
+                    "Distance_to_nearest_coast_km": distance_coast,
+                    "daysaftermonsoon": days_monsoon
+                }
+
+                # ----------------------------------------------------
+                # Prepare LSTM input independently (unchanged).
+                # ----------------------------------------------------
+                lstm_observation = {
+                    "Lat": lat,
+                    "Lon": lon,
+                    "CP": cp,
+                    "WS": ws,
+                    "Year": year,
+                    "Month": month,
+                    "Day": day,
+                    "hrs_corrected": hrs_corrected,
+                    "Gradeno": gradeno,
+                    "season": season
+                }
+
+                # Save both histories, and retain timing metadata separately
+                # so it does not become an extra predictor input column.
+                if first_dt is None:
+                    st.session_state.tcn_first_observation_datetime = observation_dt
+                st.session_state.tcn_last_observation_datetime = observation_dt
+                st.session_state.tcn_track_history.append(tcn_observation)
+                st.session_state.lstm_track_history.append(lstm_observation)
+
+                st.success(
+                    f"Observation added for {day:02d} {month_display} "
+                    f"{year}, {hours_display:02d}:00 UTC."
+                )
+                st.caption(
+                    f"Automated TCN features — direction: {direction:.2f}°, "
+                    f"duration: {duration:.2f} h, nearest coast: "
+                    f"({nearest_lat:.4f}°, {nearest_lon:.4f}°), "
+                    f"distance: {distance_coast:.2f} km."
+                )
+            except Exception as exc:
+                st.error(f"Could not calculate automated TCN inputs: {exc}")
 
 
 # ============================================================
@@ -755,6 +899,8 @@ clear_col1, clear_col2 = st.columns(2)
 with clear_col1:
     if st.button("Clear TCN History", use_container_width=True):
         st.session_state.tcn_track_history = []
+        st.session_state.tcn_first_observation_datetime = None
+        st.session_state.tcn_last_observation_datetime = None
         st.rerun()
 
 with clear_col2:
