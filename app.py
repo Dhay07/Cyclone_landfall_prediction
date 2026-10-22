@@ -742,42 +742,46 @@ if submitted:
 # ============================================================
 
 st.divider()
-st.header("Observation History")
+st.subheader("Observation History")
 
-history_col1, history_col2 = st.columns(2)
+tcn_history = st.session_state.tcn_track_history
+lstm_history = st.session_state.lstm_track_history
 
-with history_col1:
-    st.subheader("TCN Input History")
+# Combine both model histories
+all_observations = tcn_history + lstm_history
 
-    if st.session_state.tcn_track_history:
-        tcn_track_df = pd.DataFrame(
-            st.session_state.tcn_track_history
-        )
+if all_observations:
+    observation_df = pd.DataFrame(all_observations)
 
-        st.dataframe(
-            tcn_track_df,
-            use_container_width=True,
-            hide_index=True
-        )
-    else:
-        st.info("No observations have been added to TCN yet.")
+    # Keep only unique observations
+    display_columns = [
+        "Day", "Month", "Year", "Time",
+        "Lat", "Lon", "WS", "CP"
+    ]
 
-with history_col2:
-    st.subheader("LSTM Input History")
+    # Ensure all requested columns exist
+    for col in display_columns:
+        if col not in observation_df.columns:
+            observation_df[col] = None
 
-    if st.session_state.lstm_track_history:
-        lstm_track_df = pd.DataFrame(
-            st.session_state.lstm_track_history
-        )
+    observation_df = observation_df[display_columns]
 
-        st.dataframe(
-            lstm_track_df,
-            use_container_width=True,
-            hide_index=True
-        )
-    else:
-        st.info("No observations have been added to LSTM yet.")
+    # Remove duplicate rows shared by both models
+    observation_df = observation_df.drop_duplicates()
 
+    # Sort chronologically when possible
+    observation_df = observation_df.sort_values(
+        by=["Year", "Month", "Day", "Time"],
+        kind="stable"
+    ).reset_index(drop=True)
+
+    st.dataframe(
+        observation_df,
+        use_container_width=True,
+        hide_index=True
+    )
+else:
+    st.info("No observations have been added yet.")
 
 # ============================================================
 # 13. TCN LANDfall PREDICTION
