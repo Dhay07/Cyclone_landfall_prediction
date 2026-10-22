@@ -165,7 +165,7 @@ def show_about():
 # 6. TITLE
 # ============================================================
 
-st.title("🌀 Cyclone Landfall Prediction")
+st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
 
 st.write(
     "Research-based tropical cyclone prediction using "
@@ -196,18 +196,16 @@ if "lstm_track_history" not in st.session_state:
 st.header("Cyclone Observation")
 
 st.caption(
-    "Enter one cyclone observation at a time. The observation "
-    "will be added to both model histories, with model-specific "
-    "variables processed separately."
+    "Enter one cyclone observation at a time."
 )
 
 # ============================================================
-# DATE, TIME AND SEASON DISPLAY
+# DATE AND SEASON
 # ============================================================
 
-st.subheader("Date and Time")
+st.subheader("Date and Observation")
 
-# First row: Year, Month, Day
+# Row 1: Year, Month, Day
 date_col1, date_col2, date_col3 = st.columns(3)
 
 with date_col1:
@@ -230,11 +228,10 @@ month = MONTH_NAMES.index(month_display) + 1
 
 with date_col3:
     max_day = calendar.monthrange(year, month)[1]
-
     day_options = list(range(1, max_day + 1))
     default_day = min(CURRENT_DAY, max_day)
 
-    # Keep the selected day valid when month/year changes.
+    # Keep the day valid when month or year changes.
     if st.session_state.get("obs_day") not in day_options:
         st.session_state["obs_day"] = default_day
 
@@ -245,7 +242,7 @@ with date_col3:
     )
 
 
-# Determine season from the selected month.
+# Automatically determine season from the selected month.
 season = get_season(month)
 
 SEASON_INFO = {
@@ -266,16 +263,17 @@ SEASON_INFO = {
     3: {
         "name": "Southwest Monsoon (SWM)",
         "description": (
-            "It is the monsoon period that has produced relatively more "
-            "depressions and deep depressions, many of which do not "
-            "intensify into cyclonic storms."
+            "It is the monsoon period that has produced relatively more depressions "
+            "and deep depressions, many of which do not intensify "
+            "into cyclonic storms."
         )
     },
     4: {
         "name": "Northeast Monsoon (NEM)",
         "description": (
-            "It is the post-monsoon period which is associated with many high-"
-            "intensity cyclones affecting India, particularly along the east coast."
+            "It is the post-monsoon period which is associated with many "
+            "high-intensity cyclones affecting India, particularly "
+            "along the east coast."
         )
     }
 }
@@ -283,66 +281,55 @@ SEASON_INFO = {
 season_name = SEASON_INFO[season]["name"]
 season_description = SEASON_INFO[season]["description"]
 
-
-# Second row: Time in column 1; season billboard across columns 2–4.
-time_col, season_col = st.columns([1, 3])
-
-with time_col:
-    hours_display = st.selectbox(
-        "Time (24-hour format)",
-        options=[6, 12, 18, 24],
-        index=0,
-        format_func=lambda x: f"{x:02d}:00",
-        key="obs_hours"
-    )
-
-    # Convert displayed hours to the model's expected representation.
-    hrs_corrected = float(hours_display * 100)
-
-with season_col:
-    st.markdown(
-        f"""
+# Season billboard: displayed separately below the date row.
+st.markdown(
+    f"""
+    <div style="
+        border: 2px solid #4682B4;
+        border-radius: 12px;
+        padding: 16px 24px;
+        margin: 8px 0 20px 0;
+        background-color: rgba(70, 130, 180, 0.10);
+        text-align: center;
+    ">
         <div style="
-            border: 2px solid #4682B4;
-            border-radius: 12px;
-            padding: 12px 20px;
-            min-height: 105px;
-            background-color: rgba(70, 130, 180, 0.10);
-            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            margin-bottom: 6px;
         ">
-            <div style="
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: 1.2px;
-                margin-bottom: 5px;
-            ">
-                SEASON
-            </div>
-            <div style="
-                font-size: 22px;
-                font-weight: 700;
-                margin-bottom: 5px;
-            ">
-                {season_name}
-            </div>
-            <div style="
-                font-size: 14px;
-                line-height: 1.4;
-            ">
-                {season_description}
-            </div>
+            SEASON
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div style="
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        ">
+            {season_name}
+        </div>
+        <div style="
+            font-size: 15px;
+            line-height: 1.5;
+        ">
+            {season_description}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.caption(
     "The date defaults to the current date. "
-    "Provide observation time in UTC (refer IMD notification). "
-    "Season is determined automatically from the selected month."
+    "Change if necessary."
 )
 
-st.subheader("Cyclone Parameters")
+
+# ============================================================
+# SHARED CYCLONE PARAMETERS AND LSTM GRADE
+# ============================================================
+
+# No separate "Cyclone Parameters" subheading.
+# The LSTM Grade Number is integrated into the same input area.
 
 common_col1, common_col2, common_col3 = st.columns(3)
 
@@ -389,20 +376,44 @@ with common_col2:
     )
 
 with common_col3:
+    gradeno = add_input(
+        "Grade Number",
+        "lstm_gradeno",
+        "Cyclone grade or intensity category as defined in "
+        "the LSTM training data.",
+        value=1.0,
+        format="%.4f"
+    )
+
     st.metric(
         "Selected observation date",
         f"{day:02d} {month_display} {year}"
     )
 
-    st.metric(
-        "Observation time",
-        f"{hours_display:02d}:00"
+
+# ============================================================
+# OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
+# ============================================================
+
+time_col, time_info_col = st.columns([1, 3])
+
+with time_col:
+    hours_display = st.selectbox(
+        "Time (UTC)",
+        options=[6, 12, 18, 24],
+        index=0,
+        format_func=lambda x: f"{x:02d}:00",
+        key="obs_hours"
     )
 
-st.caption(
-    "Refer IMD notification to select the time (UTC) "
-    "and current cyclone postion (decimal degreees)."
-)
+    # Convert displayed hours to the model's expected representation.
+    hrs_corrected = float(hours_display * 100)
+
+with time_info_col:
+    st.caption(
+        "Refer IMD notification to get cyclone informations at selected"
+        " observation time in UTC"
+    )
 
 # ============================================================
 # 9. TCN-SPECIFIC INPUTS
@@ -484,38 +495,6 @@ with tcn_col3:
         value=0.0,
         format="%.4f"
     )
-
-
-# ============================================================
-# 10. LSTM-SPECIFIC INPUTS
-# ============================================================
-
-st.divider()
-st.header("Additional Inputs for LSTM")
-
-st.caption(
-    "These variables are used by the LSTM model only."
-)
-
-lstm_col1, lstm_col2 = st.columns(2)
-
-with lstm_col1:
-    gradeno = add_input(
-        "Grade Number",
-        "lstm_gradeno",
-        "Cyclone grade or intensity category as defined in "
-        "the LSTM training data.",
-        value=1.0,
-        format="%.4f"
-    )
-
-with lstm_col2:
-    st.info(
-        "The LSTM uses the shared date, time, latitude, longitude, "
-        "wind speed, central pressure and automatically determined "
-        "season, together with the grade number."
-    )
-
 
 # ============================================================
 # 11. ADD OBSERVATION
