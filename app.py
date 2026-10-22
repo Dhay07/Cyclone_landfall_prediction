@@ -305,7 +305,7 @@ st.markdown(
             text-transform: uppercase;
             margin-bottom: 8px;
         ">
-            Automatically Identified Cyclone Season
+            Season
         </div>
         <div style="
             font-size: 28px;
