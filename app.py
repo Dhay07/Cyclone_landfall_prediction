@@ -316,7 +316,7 @@ with season_col:
                 letter-spacing: 1.2px;
                 margin-bottom: 5px;
             ">
-                AUTOMATICALLY IDENTIFIED SEASON
+                SEASON
             </div>
             <div style="
                 font-size: 22px;
