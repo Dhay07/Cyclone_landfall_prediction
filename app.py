@@ -248,19 +248,84 @@ hrs_corrected = float(hours_display * 100)
 # Derive season automatically from the selected month.
 season = get_season(month)
 
-st.text_input(
-    "Season (automatically determined)",
-    value=f"{season} — {SEASON_NAMES[season]}",
-    disabled=True,
-    key="display_season"
+# Derive season automatically from the selected month.
+season = get_season(month)
+
+SEASON_INFO = {
+    1: {
+        "name": "Winter",
+        "description": (
+            "A rare period for tropical cyclones to occur due to "
+            "generally unfavourable atmospheric conditions."
+        )
+    },
+    2: {
+        "name": "Summer (Pre-monsoon)",
+        "description": (
+            "The pre-monsoon period has produced some devastating "
+            "cyclones in the past, significantly affecting India."
+        )
+    },
+    3: {
+        "name": "Southwest Monsoon (SWM)",
+        "description": (
+            "The monsoon period produces relatively more depressions "
+            "and deep depressions, many of which do not intensify "
+            "into cyclonic storms."
+        )
+    },
+    4: {
+        "name": "Northeast Monsoon (NEM)",
+        "description": (
+            "The post-monsoon period is associated with many of the "
+            "high-intensity cyclones affecting India, particularly "
+            "along the east coast."
+        )
+    }
+}
+
+season_name = SEASON_INFO[season]["name"]
+season_description = SEASON_INFO[season]["description"]
+
+# Billboard-style season display
+st.markdown(
+    f"""
+    <div style="
+        border: 2px solid #4682B4;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 12px 0 20px 0;
+        background-color: rgba(70, 130, 180, 0.10);
+        text-align: center;
+    ">
+        <div style="
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        ">
+            Automatically Identified Cyclone Season
+        </div>
+        <div style="
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        ">
+            {season_name}
+        </div>
+        <div style="
+            font-size: 16px;
+            line-height: 1.6;
+        ">
+            {season_description}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
-st.caption(
-    "Refer IMD notification to select the time (UTC) "
-    "and current cyclone postion (decimal degreees)."
-)
-
-st.subheader("Shared Cyclone Parameters")
+st.subheader("Cyclone Parameters")
 
 common_col1, common_col2, common_col3 = st.columns(3)
 
@@ -317,6 +382,10 @@ with common_col3:
         f"{hours_display:02d}:00"
     )
 
+st.caption(
+    "Refer IMD notification to select the time (UTC) "
+    "and current cyclone postion (decimal degreees)."
+)
 
 # ============================================================
 # 9. TCN-SPECIFIC INPUTS
