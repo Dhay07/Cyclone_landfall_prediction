@@ -591,24 +591,9 @@ with common_col3:
 # ============================================================
 
 st.divider()
-st.header("Additional Inputs for TCN")
-
-st.caption(
-    "Direction, duration, and nearest-coast features are calculated "
-    "automatically when an observation is added. Days After Monsoon Onset "
-    "remains a manual input."
-)
-
-tcn_col1, tcn_col2 = st.columns(2)
+tcn_col1 = st.columns(1)
 
 with tcn_col1:
-    st.markdown("**Calculated automatically**")
-    st.write("- Direction from previous observation")
-    st.write("- Duration since the first observation entered")
-    st.write("- Nearest coastline latitude and longitude")
-    st.write("- Distance to nearest coastline")
-
-with tcn_col2:
     days_monsoon = add_input(
         "Days After Monsoon Onset",
         "tcn_days_monsoon",
