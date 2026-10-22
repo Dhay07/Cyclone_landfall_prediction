@@ -736,7 +736,6 @@ if submitted:
             except Exception as exc:
                 st.error(f"Could not calculate automated TCN inputs: {exc}")
 
-
 # ============================================================
 # 12. DISPLAY SHARED OBSERVATION HISTORY
 # ============================================================
@@ -744,37 +743,47 @@ if submitted:
 st.divider()
 st.subheader("Observation History")
 
-tcn_history = st.session_state.tcn_track_history
+# Use one history for display to avoid duplicate observations.
+# LSTM history contains all eight shared observation fields.
 lstm_history = st.session_state.lstm_track_history
 
-# Combine both model histories
-all_observations = tcn_history + lstm_history
+if lstm_history:
+    observation_df = pd.DataFrame(lstm_history)
 
-if all_observations:
-    observation_df = pd.DataFrame(all_observations)
+    # Convert the stored model time (e.g. 600.0) to HH:MM.
+    def format_observation_time(value):
+        if pd.isna(value):
+            return None
 
-    # Keep only unique observations
+        value = int(value)
+        hours = value // 100
+        minutes = value % 100
+        return f"{hours:02d}:{minutes:02d}"
+
+    if "hrs_corrected" in observation_df.columns:
+        observation_df["Time"] = (
+            observation_df["hrs_corrected"]
+            .apply(format_observation_time)
+        )
+
     display_columns = [
         "Day", "Month", "Year", "Time",
         "Lat", "Lon", "WS", "CP"
     ]
 
-    # Ensure all requested columns exist
+    # Ensure the table always has the requested columns.
     for col in display_columns:
         if col not in observation_df.columns:
             observation_df[col] = None
 
     observation_df = observation_df[display_columns]
 
-    # Remove duplicate rows shared by both models
-    observation_df = observation_df.drop_duplicates()
-
-    # Sort chronologically when possible
     observation_df = observation_df.sort_values(
         by=["Year", "Month", "Day", "Time"],
         kind="stable"
     ).reset_index(drop=True)
 
+    # Read-only table; do not use st.data_editor here.
     st.dataframe(
         observation_df,
         use_container_width=True,
