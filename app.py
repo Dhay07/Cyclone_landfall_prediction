@@ -322,7 +322,7 @@ st.markdown(
 # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
 # ============================================================
 
-time_col = st.columns(1)[0]
+time_col, date_col = st.columns(2)
 
 with time_col:
     hours_display = st.selectbox(
@@ -335,6 +335,12 @@ with time_col:
 
     # Convert displayed hours to the model's expected representation.
     hrs_corrected = float(hours_display * 100)
+
+with date_col:
+    st.metric(
+        "Selected observation date",
+        f"{day:02d} {month_display} {year}"
+    )
 
 st.caption(
     "The date defaults to the current date. "
@@ -444,12 +450,6 @@ with common_col3:
     </div>
     """,
     unsafe_allow_html=True
-    )
-
-
-    st.metric(
-        "Selected observation date",
-        f"{day:02d} {month_display} {year}"
     )
 
 # ============================================================
