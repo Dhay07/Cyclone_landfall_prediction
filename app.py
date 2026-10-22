@@ -320,7 +320,8 @@ st.markdown(
 
 st.caption(
     "The date defaults to the current date. "
-    "Change if necessary."
+    "Change if necessary. Refer IMD notification to get " 
+    "cyclone informations at selected observation time in UTC"
 )
 
 
@@ -332,7 +333,7 @@ st.caption(
 # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
 # ============================================================
 
-time_col, time_info_col = st.columns([1, 3])
+time_col = st.columns(1)
 
 with time_col:
     hours_display = st.selectbox(
@@ -345,13 +346,6 @@ with time_col:
 
     # Convert displayed hours to the model's expected representation.
     hrs_corrected = float(hours_display * 100)
-
-with time_info_col:
-    st.caption(
-        "Refer IMD notification to get cyclone informations at selected"
-        " observation time in UTC"
-    )
-
 
 common_col1, common_col2, common_col3 = st.columns(3)
 
