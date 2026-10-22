@@ -201,9 +201,14 @@ st.caption(
     "variables processed separately."
 )
 
+# ============================================================
+# DATE, TIME AND SEASON DISPLAY
+# ============================================================
+
 st.subheader("Date and Time")
 
-date_col1, date_col2, date_col3, date_col4 = st.columns(4)
+# First row: Year, Month, Day
+date_col1, date_col2, date_col3 = st.columns(3)
 
 with date_col1:
     year = st.selectbox(
@@ -226,29 +231,21 @@ month = MONTH_NAMES.index(month_display) + 1
 with date_col3:
     max_day = calendar.monthrange(year, month)[1]
 
+    day_options = list(range(1, max_day + 1))
+    default_day = min(CURRENT_DAY, max_day)
+
+    # Keep the selected day valid when month/year changes.
+    if st.session_state.get("obs_day") not in day_options:
+        st.session_state["obs_day"] = default_day
+
     day = st.selectbox(
         "Day",
-        options=list(range(1, max_day + 1)),
-        index=min(CURRENT_DAY, max_day) - 1,
+        options=day_options,
         key="obs_day"
     )
 
-with date_col4:
-    hours_display = st.selectbox(
-        "Time (24-hour format)",
-        options=[6, 12, 18, 24],
-        index=0,
-        format_func=lambda x: f"{x:02d}:00",
-        key="obs_hours"
-    )
 
-# Both existing models use the HHMM-style numeric representation.
-hrs_corrected = float(hours_display * 100)
-
-# Derive season automatically from the selected month.
-season = get_season(month)
-
-# Derive season automatically from the selected month.
+# Determine season from the selected month.
 season = get_season(month)
 
 SEASON_INFO = {
@@ -260,26 +257,25 @@ SEASON_INFO = {
         )
     },
     2: {
-        "name": "Summer",
+        "name": "Summer (Pre-monsoon)",
         "description": (
-            "It is the pre-monsoon period that has produced some devastating "
+            "The pre-monsoon period has produced some devastating "
             "cyclones in the past, significantly affecting India."
         )
     },
     3: {
         "name": "Southwest Monsoon (SWM)",
         "description": (
-            "It is the monsoon period that produces relatively more "
-            "depressions and deep depressions, many of which do not "
-            "intensify into cyclonic storms."
+            "The monsoon period produces relatively more depressions "
+            "and deep depressions, many of which do not intensify "
+            "into cyclonic storms."
         )
     },
     4: {
         "name": "Northeast Monsoon (NEM)",
         "description": (
-            "It is the post-monsoon period which is associated with many "
-            "of the high-intensity cyclones affecting India, particularly "
-            "along the east coast."
+            "The post-monsoon period is associated with many high-intensity "
+            "cyclones affecting India, particularly along the east coast."
         )
     }
 }
@@ -287,42 +283,63 @@ SEASON_INFO = {
 season_name = SEASON_INFO[season]["name"]
 season_description = SEASON_INFO[season]["description"]
 
-# Billboard-style season display
-st.markdown(
-    f"""
-    <div style="
-        border: 2px solid #4682B4;
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin: 12px 0 20px 0;
-        background-color: rgba(70, 130, 180, 0.10);
-        text-align: center;
-    ">
+
+# Second row: Time in column 1; season billboard across columns 2–4.
+time_col, season_col = st.columns([1, 3])
+
+with time_col:
+    hours_display = st.selectbox(
+        "Time (24-hour format)",
+        options=[6, 12, 18, 24],
+        index=0,
+        format_func=lambda x: f"{x:02d}:00",
+        key="obs_hours"
+    )
+
+    # Convert displayed hours to the model's expected representation.
+    hrs_corrected = float(hours_display * 100)
+
+with season_col:
+    st.markdown(
+        f"""
         <div style="
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+            border: 2px solid #4682B4;
+            border-radius: 12px;
+            padding: 12px 20px;
+            min-height: 105px;
+            background-color: rgba(70, 130, 180, 0.10);
+            text-align: center;
         ">
-            Season
+            <div style="
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 1.2px;
+                margin-bottom: 5px;
+            ">
+                AUTOMATICALLY IDENTIFIED SEASON
+            </div>
+            <div style="
+                font-size: 22px;
+                font-weight: 700;
+                margin-bottom: 5px;
+            ">
+                {season_name}
+            </div>
+            <div style="
+                font-size: 14px;
+                line-height: 1.4;
+            ">
+                {season_description}
+            </div>
         </div>
-        <div style="
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        ">
-            {season_name}
-        </div>
-        <div style="
-            font-size: 16px;
-            line-height: 1.6;
-        ">
-            {season_description}
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
+        """,
+        unsafe_allow_html=True
+    )
+
+st.caption(
+    "The date defaults to the current date. "
+    "Provide observation time in UTC (refer IMD notification). "
+    "Season is determined automatically from the selected month."
 )
 
 st.subheader("Cyclone Parameters")
@@ -331,7 +348,7 @@ common_col1, common_col2, common_col3 = st.columns(3)
 
 with common_col1:
     lat = add_input(
-        "Latitude (°)",
+        "Latitude (DD)",
         "obs_lat",
         "Latitude of the cyclone centre in decimal degrees.",
         min_value=-90.0,
@@ -341,7 +358,7 @@ with common_col1:
     )
 
     lon = add_input(
-        "Longitude (°)",
+        "Longitude (DD)",
         "obs_lon",
         "Longitude of the cyclone centre in decimal degrees.",
         min_value=-180.0,
