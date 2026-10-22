@@ -252,30 +252,30 @@ SEASON_INFO = {
     1: {
         "name": "Winter",
         "description": (
-            "A rare period for tropical cyclones to occur due to "
+            "It is a rare period for tropical cyclones to occur due to "
             "generally unfavourable atmospheric conditions."
         )
     },
     2: {
-        "name": "Summer (Pre-monsoon)",
+        "name": "Summer",
         "description": (
-            "The pre-monsoon period has produced some devastating "
+            "It is the pre-monsoon period that has produced some devastating "
             "cyclones in the past, significantly affecting India."
         )
     },
     3: {
         "name": "Southwest Monsoon (SWM)",
         "description": (
-            "The monsoon period produces relatively more depressions "
-            "and deep depressions, many of which do not intensify "
-            "into cyclonic storms."
+            "It is the monsoon period that has produced relatively more "
+            "depressions and deep depressions, many of which do not "
+            "intensify into cyclonic storms."
         )
     },
     4: {
         "name": "Northeast Monsoon (NEM)",
         "description": (
-            "The post-monsoon period is associated with many high-intensity "
-            "cyclones affecting India, particularly along the east coast."
+            "It is the post-monsoon period which is associated with many high-"
+            "intensity cyclones affecting India, particularly along the east coast."
         )
     }
 }
