@@ -386,8 +386,9 @@ with common_col2:
         format="%.4f"
     )
 
+```python
 with common_col3:
-    # Automatically determine Grade Number from wind speed (knots)
+    # Automatically calculate Grade Number from wind speed (knots)
     if 17 <= ws <= 27:
         gradeno = 1
     elif 28 <= ws <= 33:
@@ -405,12 +406,26 @@ with common_col3:
     else:
         gradeno = 0
 
-    st.metric("Cyclone category", gradeno)
+    # Display-only category names
+    grade_names = {
+        0: "Below specified range",
+        1: "Depression",
+        2: "Deep depression",
+        3: "Cyclonic storm",
+        4: "Severe cyclonic storm",
+        5: "Very severe cyclonic storm",
+        6: "Extremely severe cyclonic storm",
+        7: "Super cyclonic storm"
+    }
+
+    st.metric("Grade Number", gradeno)
+    st.caption(f"Cyclone Category: {grade_names[gradeno]}")
 
     st.metric(
         "Selected observation date",
         f"{day:02d} {month_display} {year}"
     )
+```
 
 
 # ============================================================
