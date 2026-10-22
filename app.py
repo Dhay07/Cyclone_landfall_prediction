@@ -593,7 +593,7 @@ with common_col3:
 st.divider()
 tcn_col1 = st.columns(1)
 
-with tcn_col1:
+with tcn_col1[0]:
     days_monsoon = add_input(
         "Days After Monsoon Onset",
         "tcn_days_monsoon",
