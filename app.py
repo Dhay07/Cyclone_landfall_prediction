@@ -333,7 +333,7 @@ st.caption(
 # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
 # ============================================================
 
-time_col = st.columns(1)
+time_col = st.columns(1)[0]
 
 with time_col:
     hours_display = st.selectbox(
