@@ -504,9 +504,7 @@ with content_col:
     # ============================================================
 
     with billboard_col:
-
-        st.subheader("Cyclone Classification")
-
+        
         SEASON_INFO = {
             1: {
                 "name": "Winter",
@@ -624,8 +622,8 @@ with content_col:
             "Season updates automatically with the selected month. "
             "Storm category updates automatically with wind speed."
         )
-
-    prediction_panel = st.container()
+        prediction_panel = st.container()
+    
     # Load the coastline data once and cache it. The dataset must have a valid CRS.
     try:
         _coast_mtime = os.path.getmtime(COASTLINE_PATH) if os.path.exists(COASTLINE_PATH) else 0
