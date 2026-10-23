@@ -332,210 +332,145 @@ if "tcn_last_observation_datetime" not in st.session_state:
 left_space, content_col, right_space = st.columns([0.05, 0.90, 0.05])
 
 with content_col:
-    # ============================================================
-    # 8. COMMON INPUTS
-    # ============================================================
 
     st.header("Cyclone Observation")
+    st.caption("Enter one cyclone observation at a time.")
 
-    st.caption(
-        "Enter one cyclone observation at a time."
+    # ============================================================
+    # TWO-COLUMN LAYOUT
+    # LEFT: DATE AND OBSERVATION INPUTS
+    # RIGHT: SEASON AND CYCLONE CATEGORY BILLBOARDS
+    # ============================================================
+
+    input_col, billboard_col = st.columns(
+        [2.1, 1],
+        gap="large"
     )
 
     # ============================================================
-    # DATE AND SEASON
+    # LEFT COLUMN: DATE, TIME AND OBSERVATION INPUTS
     # ============================================================
 
-    # Row 1: Year, Month, Day
-    date_col1, date_col2, date_col3 = st.columns(3)
+    with input_col:
 
-    with date_col1:
-        year = st.selectbox(
-            "Year",
-            options=list(range(1990, CURRENT_YEAR + 1)),
-            index=CURRENT_YEAR - 1990,
-            key="obs_year"
-        )
+        st.subheader("Observation Date and Time")
 
-    with date_col2:
-        month_display = st.selectbox(
-            "Month",
-            options=MONTH_NAMES,
-            index=CURRENT_MONTH - 1,
-            key="obs_month"
-        )
+        date_col1, date_col2, date_col3 = st.columns(3)
 
-    month = MONTH_NAMES.index(month_display) + 1
-
-    with date_col3:
-        max_day = calendar.monthrange(year, month)[1]
-        day_options = list(range(1, max_day + 1))
-        default_day = min(CURRENT_DAY, max_day)
-
-        # Keep the day valid when month or year changes.
-        if st.session_state.get("obs_day") not in day_options:
-            st.session_state["obs_day"] = default_day
-
-        day = st.selectbox(
-            "Day",
-            options=day_options,
-            key="obs_day"
-        )
-
-
-    # Automatically determine season from the selected month.
-    season = get_season(month)
-
-    SEASON_INFO = {
-        1: {
-            "name": "Winter",
-            "description": (
-                "It is a rare period for tropical cyclones to occur due to "
-                "generally unfavourable atmospheric conditions."
+        with date_col1:
+            year = st.selectbox(
+                "Year",
+                options=list(range(1990, CURRENT_YEAR + 1)),
+                index=CURRENT_YEAR - 1990,
+                key="obs_year"
             )
-        },
-        2: {
-            "name": "Summer",
-            "description": (
-                "It is the pre-monsoon period that has produced some devastating "
-                "cyclones in the past, significantly affecting India."
+
+        with date_col2:
+            month_display = st.selectbox(
+                "Month",
+                options=MONTH_NAMES,
+                index=CURRENT_MONTH - 1,
+                key="obs_month"
             )
-        },
-        3: {
-            "name": "Southwest Monsoon (SWM)",
-            "description": (
-                "It is the monsoon period that has produced relatively more depressions "
-                "and deep depressions, many of which do not intensify "
-                "into cyclonic storms."
+
+        month = MONTH_NAMES.index(month_display) + 1
+
+        with date_col3:
+            max_day = calendar.monthrange(year, month)[1]
+            day_options = list(range(1, max_day + 1))
+            default_day = min(CURRENT_DAY, max_day)
+
+            if st.session_state.get("obs_day") not in day_options:
+                st.session_state["obs_day"] = default_day
+
+            day = st.selectbox(
+                "Day",
+                options=day_options,
+                key="obs_day"
             )
-        },
-        4: {
-            "name": "Northeast Monsoon (NEM)",
-            "description": (
-                "It is the post-monsoon period which is associated with many "
-                "high-intensity cyclones affecting India, particularly "
-                "along the east coast."
+
+        # Determine season automatically from the selected month.
+        season = get_season(month)
+
+        # Observation time
+        time_col, selected_date_col = st.columns(2)
+
+        with time_col:
+            hours_display = st.selectbox(
+                "Time (UTC)",
+                options=[0, 6, 12, 18],
+                index=1,
+                format_func=lambda x: f"{x:02d}:00",
+                key="obs_hours"
             )
-        }
-    }
 
-    season_name = SEASON_INFO[season]["name"]
-    season_description = SEASON_INFO[season]["description"]
+            hrs_corrected = float(
+                2400 if hours_display == 0
+                else hours_display * 100
+            )
 
-    # Season billboard: displayed separately below the date row.
-    st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #4682B4;
-            border-radius: 12px;
-            padding: 16px 24px;
-            margin: 6px auto 12px auto;
-            background-color: rgba(70, 130, 180, 0.10);
-            text-align: center;
-            max-width: 700px;
-            width: 100%;
-            box-sizing: border-box;
-        ">
-            <div style="
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: 1.2px;
-                margin-bottom: 6px;
-            ">
-                SEASON
-            </div>
-            <div style="
-                font-size: 24px;
-                font-weight: 700;
-                margin-bottom: 6px;
-            ">
-                {season_name}
-            </div>
-            <div style="
-                font-size: 15px;
-                line-height: 1.5;
-            ">
-                {season_description}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        with selected_date_col:
+            st.metric(
+                "Selected observation date",
+                f"{day:02d} {month_display} {year}"
+            )
+            st.caption(f"Observation time: {hours_display:02d}:00 UTC")
 
-    # ============================================================
-    # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
-    # ============================================================
-    st.caption(
-        "The date defaults to the current date. "
-        "Change if necessary. Refer IMD bulletin to obtain " 
-        "cyclone informations for the selected observation time (UTC)"
-    )
-    time_col, date_col = st.columns(2)
+        st.divider()
 
-    with time_col:
-        hours_display = st.selectbox(
-            "Time (UTC)",
-            options=[0, 6, 12, 18],
-            index=1,
-            format_func=lambda x: f"{x:02d}:00",
-            key="obs_hours"
-        )
+        st.subheader("Cyclone Parameters")
 
-        # Convert displayed time to the model's expected representation.
-        hrs_corrected = float(2400 if hours_display == 0 else hours_display * 100)
+        common_col1, common_col2 = st.columns(2)
 
-    with date_col:
-        st.metric(
-            "Selected observation date",
-            f"{day:02d} {month_display} {year}"
-        )
+        with common_col1:
+            lat = add_input(
+                "Latitude (DD)",
+                "obs_lat",
+                "Latitude of the cyclone centre in decimal degrees.",
+                min_value=-90.0,
+                max_value=90.0,
+                value=15.0,
+                format="%.4f"
+            )
 
-    common_col1, common_col2, common_col3 = st.columns(3)
+            lon = add_input(
+                "Longitude (DD)",
+                "obs_lon",
+                "Longitude of the cyclone centre in decimal degrees.",
+                min_value=-180.0,
+                max_value=180.0,
+                value=85.0,
+                format="%.4f"
+            )
 
-    with common_col1:
-        lat = add_input(
-            "Latitude (DD)",
-            "obs_lat",
-            "Latitude of the cyclone centre in decimal degrees.",
-            min_value=-90.0,
-            max_value=90.0,
-            value=15.0,
-            format="%.4f"
-        )
+            ws = add_input(
+                "Wind Speed (knots)",
+                "obs_ws",
+                "Maximum sustained wind speed at the observation time, in knots.",
+                min_value=0.0,
+                value=40.0,
+                format="%.4f"
+            )
 
-        lon = add_input(
-            "Longitude (DD)",
-            "obs_lon",
-            "Longitude of the cyclone centre in decimal degrees.",
-            min_value=-180.0,
-            max_value=180.0,
-            value=85.0,
-            format="%.4f"
-        )
+        with common_col2:
+            cp = add_input(
+                "Central Pressure (hPa)",
+                "obs_cp",
+                "Estimated minimum central pressure at the observation time, in hectopascals.",
+                min_value=0.0,
+                value=1000.0,
+                format="%.4f"
+            )
 
-    with common_col2:
-        ws = add_input(
-            "Wind Speed (knots)",
-            "obs_ws",
-            "Maximum sustained wind speed at the observation time, "
-            "in knots.",
-            min_value=0.0,
-            value=40.0,
-            format="%.4f"
-        )
+            days_monsoon = add_input(
+                "Days After Monsoon Onset",
+                "tcn_days_monsoon",
+                "Number of days between Kerala southwest monsoon onset and cyclone genesis. Check the official IMD website.",
+                value=0.0,
+                format="%.4f"
+            )
 
-        cp = add_input(
-            "Central Pressure (hPa)",
-            "obs_cp",
-            "Estimated minimum central pressure at the observation "
-            "time, in hectopascals.",
-            min_value=0.0,
-            value=1000.0,
-            format="%.4f"
-        )
-
-    with common_col3:
-        # Automatically calculate Grade Number from wind speed (knots)
+        # Calculate cyclone grade from wind speed.
         if 17 <= ws <= 27:
             gradeno = 1
         elif 28 <= ws <= 33:
@@ -553,61 +488,144 @@ with content_col:
         else:
             gradeno = 0
 
-        # Display-only category names
         grade_names = {
             0: "Marked Low Pressure",
             1: "Depression (D)",
             2: "Deep Depression (DD)",
             3: "Cyclonic Storm (CS)",
-            4: "Severe Syclonic Storm (SCS)",
+            4: "Severe Cyclonic Storm (SCS)",
             5: "Very Severe Cyclonic Storm (VSCS)",
             6: "Extremely Severe Cyclonic Storm (ESCS)",
             7: "Super Cyclonic Storm (SuCS)"
         }
 
-        days_monsoon = add_input(
-            "Days After Monsoon Onset",
-            "tcn_days_monsoon",
-            "Number of days between Kerala southwest monsoon onset "
-            "and cyclone genesis. Check IMD official website.",
-            value=0.0,
-            format="%.4f"
+    # ============================================================
+    # RIGHT COLUMN: SEASON AND STORM CATEGORY BILLBOARDS
+    # ============================================================
+
+    with billboard_col:
+
+        st.subheader("Cyclone Classification")
+
+        SEASON_INFO = {
+            1: {
+                "name": "Winter",
+                "description": (
+                    "A rare period for tropical cyclones due to "
+                    "generally unfavourable atmospheric conditions."
+                )
+            },
+            2: {
+                "name": "Summer",
+                "description": (
+                    "The pre-monsoon period, which has produced "
+                    "some devastating cyclones affecting India."
+                )
+            },
+            3: {
+                "name": "Southwest Monsoon (SWM)",
+                "description": (
+                    "This period produces depressions and deep "
+                    "depressions, many of which do not intensify "
+                    "into cyclonic storms."
+                )
+            },
+            4: {
+                "name": "Northeast Monsoon (NEM)",
+                "description": (
+                    "The post-monsoon period associated with many "
+                    "high-intensity cyclones affecting India's east coast."
+                )
+            }
+        }
+
+        season_name = SEASON_INFO[season]["name"]
+        season_description = SEASON_INFO[season]["description"]
+
+        st.markdown(
+            f"""
+            <div style="
+                border: 2px solid #4682B4;
+                border-radius: 12px;
+                padding: 20px 16px;
+                margin: 0 0 20px 0;
+                background-color: rgba(70, 130, 180, 0.10);
+                text-align: center;
+                min-height: 185px;
+                box-sizing: border-box;
+            ">
+                <div style="
+                    font-size: 12px;
+                    font-weight: 600;
+                    letter-spacing: 1.2px;
+                    margin-bottom: 10px;
+                ">SEASON</div>
+                <div style="
+                    font-size: 23px;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                ">{season_name}</div>
+                <div style="
+                    font-size: 14px;
+                    line-height: 1.5;
+                ">{season_description}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
-        st.metric("Grade Number", gradeno)
-        
-    st.markdown(
-        f"""
-        <div style="
-            width: fit-content;
-            min-width: 320px;
-            max-width: 90%;
-            box-sizing: border-box;
-            background-color: #FEF2F2;
-            border: 1px solid #DC2626;
-            border-left: 6px solid #DC2626;
-            border-radius: 10px;
-            padding: 18px 35px;
-            margin: 10px auto 16px auto;
-            text-align: center;
-        ">
-            <div style="
-                font-size: 16px;
-                color: #B91C1C;
-                font-weight: 700;
-                margin-bottom: 8px;
-            ">⚠️ STORM CATEGORY</div>
-            <div style="
-                font-size: 22px;
-                color: #991B1B;
-                font-weight: 700;
-            ">{grade_names[gradeno]}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        category_colors = {
+            0: ("#64748B", "rgba(100, 116, 139, 0.10)"),
+            1: ("#0D9488", "rgba(13, 148, 136, 0.10)"),
+            2: ("#0891B2", "rgba(8, 145, 178, 0.10)"),
+            3: ("#2563EB", "rgba(37, 99, 235, 0.10)"),
+            4: ("#D97706", "rgba(217, 119, 6, 0.10)"),
+            5: ("#EA580C", "rgba(234, 88, 12, 0.10)"),
+            6: ("#DC2626", "rgba(220, 38, 38, 0.10)"),
+            7: ("#9333EA", "rgba(147, 51, 234, 0.10)")
+        }
 
+        category_color, category_bg = category_colors[gradeno]
 
+        st.markdown(
+            f"""
+            <div style="
+                border: 2px solid {category_color};
+                border-left: 7px solid {category_color};
+                border-radius: 12px;
+                padding: 24px 16px;
+                margin: 0 0 16px 0;
+                background-color: {category_bg};
+                text-align: center;
+                min-height: 150px;
+                box-sizing: border-box;
+            ">
+                <div style="
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 1.1px;
+                    margin-bottom: 14px;
+                ">STORM CATEGORY</div>
+                <div style="
+                    font-size: 21px;
+                    font-weight: 700;
+                    line-height: 1.4;
+                ">{grade_names[gradeno]}</div>
+                <div style="
+                    font-size: 14px;
+                    margin-top: 12px;
+                ">Grade Number: {gradeno}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.caption(
+            "Season updates automatically with the selected month. "
+            "Storm category updates automatically with wind speed."
+        )
+
+    prediction_panel = st.container()
     # Load the coastline data once and cache it. The dataset must have a valid CRS.
     try:
         _coast_mtime = os.path.getmtime(COASTLINE_PATH) if os.path.exists(COASTLINE_PATH) else 0
@@ -914,14 +932,21 @@ with content_col:
     # 13. MODEL PREDICTIONS — SHOWN ONLY AFTER CLICKING PREDICT
     # ============================================================
 
-    if st.session_state.show_predictions:
 
-        # ============================================================
-        # 14. LSTM TRACK PREDICTION
-        # ============================================================
+# ============================================================
+# MODEL PREDICTIONS — DISPLAY BELOW THE RIGHT-SIDE BILLBOARDS
+# ============================================================
+
+if st.session_state.show_predictions:
+
+    with prediction_panel:
+
+        # ========================================================
+        # LSTM TRACK PREDICTION
+        # ========================================================
 
         st.divider()
-        st.header("Predicted track 12 h ahead")
+        st.subheader("Predicted Track 12 h Ahead")
 
         st.caption(
             f"Model version: {LSTM_CONFIG['model_version']}"
@@ -936,19 +961,15 @@ with content_col:
             try:
                 lstm_result = predict_lstm(lstm_track_df)
 
-                pred_col1, pred_col2 = st.columns(2)
+                st.metric(
+                    "Predicted Latitude",
+                    f"{lstm_result['predicted_lat']:.4f}°"
+                )
 
-                with pred_col1:
-                    st.metric(
-                        "Predicted Track Latitude",
-                        f"{lstm_result['predicted_lat']:.4f}°"
-                    )
-
-                with pred_col2:
-                    st.metric(
-                        "Predicted Track Longitude",
-                        f"{lstm_result['predicted_lon']:.4f}°"
-                    )
+                st.metric(
+                    "Predicted Longitude",
+                    f"{lstm_result['predicted_lon']:.4f}°"
+                )
 
                 st.caption(
                     "Prediction horizon: "
@@ -964,12 +985,12 @@ with content_col:
                 "the LSTM track prediction."
             )
 
-        # ============================================================
-        # 13. TCN LANDfall PREDICTION
-        # ============================================================
+        # ========================================================
+        # TCN LANDFALL PREDICTION
+        # ========================================================
 
         st.divider()
-        st.header("Predicted landfall location")
+        st.subheader("Predicted Landfall")
 
         st.caption(
             f"Model version: {TCN_CONFIG['model_version']}"
@@ -984,19 +1005,15 @@ with content_col:
             try:
                 tcn_result = predict_tcn(tcn_track_df)
 
-                pred_col1, pred_col2 = st.columns(2)
+                st.metric(
+                    "Landfall Latitude",
+                    f"{tcn_result['predicted_landfall_lat']:.4f}°"
+                )
 
-                with pred_col1:
-                    st.metric(
-                        "Predicted Landfall Latitude",
-                        f"{tcn_result['predicted_landfall_lat']:.4f}°"
-                    )
-
-                with pred_col2:
-                    st.metric(
-                        "Predicted Landfall Longitude",
-                        f"{tcn_result['predicted_landfall_lon']:.4f}°"
-                    )
+                st.metric(
+                    "Landfall Longitude",
+                    f"{tcn_result['predicted_landfall_lon']:.4f}°"
+                )
 
             except Exception as e:
                 st.error(f"TCN prediction error: {e}")
@@ -1006,8 +1023,6 @@ with content_col:
                 "Add at least two cyclone observations to generate "
                 "the TCN landfall prediction."
             )
-
-
 
 # ============================================================
 # 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
