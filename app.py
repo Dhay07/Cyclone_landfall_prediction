@@ -295,7 +295,83 @@ def show_about():
     the IMD or other authorized meteorological agencies.
     """)
 
+# ============================================================
+# DARK / LIGHT MODE TOGGLE
+# ============================================================
 
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+_, theme_col = st.columns([12, 1])
+
+with theme_col:
+    if st.button(
+        "☀️" if st.session_state.dark_mode else "🌙",
+        key="theme_toggle",
+        help="Switch between dark mode and light mode",
+        use_container_width=True
+    ):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+
+dark_mode = st.session_state.dark_mode
+
+if dark_mode:
+    bg_color = "#0E1117"
+    text_color = "#FAFAFA"
+    panel_color = "#1C2430"
+    border_color = "#34445A"
+    input_color = "#202B3A"
+else:
+    bg_color = "#FFFFFF"
+    text_color = "#202B3A"
+    panel_color = "#F3F7FC"
+    border_color = "#D5DFEA"
+    input_color = "#FFFFFF"
+
+st.markdown(
+    f"""
+    <style>
+        .stApp,
+        [data-testid="stAppViewContainer"] {{
+            background-color: {bg_color};
+            color: {text_color};
+        }}
+
+        [data-testid="stHeader"] {{
+            background-color: {bg_color};
+        }}
+
+        [data-testid="stMain"] {{
+            background-color: {bg_color};
+        }}
+
+        .stMarkdown, .stCaption,
+        label, [data-testid="stMetricLabel"] {{
+            color: {text_color};
+        }}
+
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="textarea"] > div {{
+            background-color: {input_color};
+            color: {text_color};
+            border-color: {border_color};
+        }}
+
+        [data-testid="stDataFrame"] {{
+            border: 1px solid {border_color};
+            border-radius: 10px;
+        }}
+
+        div[data-testid="stVerticalBlockBorderWrapper"] {{
+            background-color: {panel_color};
+            border-color: {border_color};
+            border-radius: 12px;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # ============================================================
 # 6. TITLE
 # ============================================================
