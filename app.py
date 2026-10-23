@@ -553,15 +553,7 @@ with common_col3:
         format="%.4f"
     )
 
-    st.markdown(
-    f"""
-    <div style="font-size: 18px; margin-top: 8px;">
-        <strong>Grade Number:
-        </strong> {gradeno}
-    </div>
-    """,
-    unsafe_allow_html=True
-    )
+    st.metric("Grade Number", gradeno)
     
 st.markdown(
     f"""
