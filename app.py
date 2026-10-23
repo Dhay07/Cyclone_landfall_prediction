@@ -324,8 +324,6 @@ st.caption(
 # DATE AND SEASON
 # ============================================================
 
-st.subheader("Date and Observation")
-
 # Row 1: Year, Month, Day
 date_col1, date_col2, date_col3 = st.columns(3)
 
@@ -575,7 +573,7 @@ st.markdown(
             color: #B91C1C;
             font-weight: 700;
             margin-bottom: 8px;
-        ">⚠️ CYCLONE CATEGORY</div>
+        ">⚠️ STORM CATEGORY</div>
         <div style="
             font-size: 22px;
             color: #991B1B;
