@@ -799,6 +799,8 @@ if lstm_history:
             return None
 
         value = int(value)
+        if value == 2400:
+           return "00:00"
         hours = value // 100
         minutes = value % 100
         return f"{hours:02d}:{minutes:02d}"
