@@ -419,6 +419,7 @@ with content_col:
             margin: 8px 0 20px 0;
             background-color: rgba(70, 130, 180, 0.10);
             text-align: center;
+            max-width: 700px;
         ">
             <div style="
                 font-size: 12px;
