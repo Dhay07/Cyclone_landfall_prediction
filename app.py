@@ -449,7 +449,11 @@ with content_col:
     # ============================================================
     # OBSERVATION TIME — BELOW THE CYCLONE PARAMETERS
     # ============================================================
-
+    st.caption(
+        "The date defaults to the current date. "
+        "Change if necessary. Refer IMD bulletin to obtain " 
+        "cyclone informations for the selected observation time (UTC)"
+    )
     time_col, date_col = st.columns(2)
 
     with time_col:
@@ -469,12 +473,6 @@ with content_col:
             "Selected observation date",
             f"{day:02d} {month_display} {year}"
         )
-
-    st.caption(
-        "The date defaults to the current date. "
-        "Change if necessary. Refer IMD bulletin to obtain " 
-        "cyclone informations for the selected observation time (UTC)"
-    )
 
     common_col1, common_col2, common_col3 = st.columns(3)
 
