@@ -256,14 +256,12 @@ def show_about():
       for the predictions.
     - Predictions depend on the accuracy and consistency of
       the supplied observations.
-    - Automated TCN coastline features require a georeferenced coastline
-      vector dataset; direction calculations must match the training convention.
     - The models are primarily intended for the Bay of Bengal;
       performance may vary across cyclones and seasons.
 
     Current cyclone observations may be obtained from
-    [Windy](https://www.windy.com/) and the
-    [India Meteorological Department](https://mausam.imd.gov.in/).
+    [India Meteorological Department](https://mausam.imd.gov.in/)
+    and the [Windy](https://www.windy.com/).
 
     ---
 
@@ -998,7 +996,7 @@ st.divider()
 center_col, contact_col, links_col = st.columns(3)
 
 with center_col:
-    if st.button("ℹ️ About", use_container_width=True):
+    if st.button("ℹ️ About", use_container_width=True, type="tertiary"):
         show_about()
 
 with contact_col:
