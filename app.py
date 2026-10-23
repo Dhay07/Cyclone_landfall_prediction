@@ -6,7 +6,30 @@ import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import math
+st.markdown(
+    """
+    <style>
+        [data-testid="stToolbar"] {
+            visibility: hidden;
+            height: 0%;
+            position: fixed;
+        }
 
+        [data-testid="stDecoration"] {
+            display: none;
+        }
+
+        #MainMenu {
+            visibility: hidden;
+        }
+
+        footer {
+            visibility: hidden;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # Optional geospatial dependencies are required for automatic coastline features.
 try:
     import geopandas as gpd
