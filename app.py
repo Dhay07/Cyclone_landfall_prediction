@@ -534,14 +534,14 @@ with common_col3:
 
     # Display-only category names
     grade_names = {
-        0: "Below specified range",
-        1: "Depression",
-        2: "Deep depression",
-        3: "Cyclonic storm",
-        4: "Severe cyclonic storm",
-        5: "Very severe cyclonic storm",
-        6: "Extremely severe cyclonic storm",
-        7: "Super cyclonic storm"
+        0: "Marked Low Pressure",
+        1: "Depression (D)",
+        2: "Deep Depression (DD)",
+        3: "Cyclonic Storm (CS)",
+        4: "Severe Syclonic Storm (SCS)",
+        5: "Very Severe Cyclonic Storm (VSCS)",
+        6: "Extremely Severe Cyclonic Storm (ESCS)",
+        7: "Super Cyclonic Storm (SuCS)"
     }
 
     st.metric("Category Number", gradeno)
@@ -549,26 +549,27 @@ with common_col3:
 st.markdown(
     f"""
     <div style="
-        width: 100%;
+        width: fit-content;
+        max-width: 90%;
         box-sizing: border-box;
-        background-color: #FDEDEC;
-        border-left: 5px solid #C0392B;
+        background-color: #FEF2F2;
+        border: 1px solid #DC2626;
+        border-left: 5px solid #DC2626;
         border-radius: 8px;
-        padding: 12px 14px;
-        margin-top: 5px;
-        margin-bottom: 12px;
+        padding: 10px 22px;
+        margin: 8px auto 12px auto;
         text-align: center;
     ">
         <div style="
             font-size: 12px;
-            color: #922B21;
-            font-weight: 800;
+            color: #B91C1C;
+            font-weight: 700;
             margin-bottom: 4px;
-        ">CYCLONE CATEGORY</div>
+        ">⚠️ CYCLONE CATEGORY</div>
         <div style="
             font-size: 16px;
-            color: #C0392B;
-            font-weight: 900;
+            color: #991B1B;
+            font-weight: 700;
         ">{grade_names[gradeno]}</div>
     </div>
     """,
