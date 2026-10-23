@@ -611,6 +611,9 @@ submitted = st.button(
 )
 
 if submitted:
+    # ----------------------------------------------------
+    # 1. Validate the selected calendar date
+    # ----------------------------------------------------
     days_in_month = calendar.monthrange(year, month)[1]
 
     if not 1 <= day <= days_in_month:
@@ -618,147 +621,185 @@ if submitted:
             f"Invalid date: {month_display} {year} has "
             f"{days_in_month} days. Please select a valid date."
         )
+        st.stop()
 
-    elif COASTLINE_GDF is None:
+    if COASTLINE_GDF is None:
         st.error(
-            "TCN observation was not added because the coastline data could "
-            "not be loaded. Fix the coastline path/format and try again."
+            "TCN observation was not added because the coastline data "
+            "could not be loaded. Fix the coastline path/format and try again."
+        )
+        st.stop()
+
+    if hours_display not in [6, 12, 18, 24]:
+        st.error(
+            "Observation time must be 06:00, 12:00, 18:00, or 24:00 UTC."
+        )
+        st.stop()
+
+    # ----------------------------------------------------
+    # 2. Get previous observation timestamps
+    # ----------------------------------------------------
+    previous_dt = st.session_state.tcn_last_observation_datetime
+    first_dt = st.session_state.tcn_first_observation_datetime
+
+    selected_date = datetime(year, month, day)
+
+    # ----------------------------------------------------
+    # 3. If 24:00 is selected, require the next calendar date
+    # ----------------------------------------------------
+    if hours_display == 24 and previous_dt is not None:
+        expected_date = previous_dt.date() + timedelta(days=1)
+        selected_calendar_date = selected_date.date()
+
+        if selected_calendar_date != expected_date:
+            st.error(
+                "When selecting 24:00, change the date to the next "
+                "calendar day. For example, after 23 Oct 2026 at 18:00, "
+                "select 24 Oct 2026 and 24:00."
+            )
+            st.stop()
+
+    # ----------------------------------------------------
+    # 4. Construct the actual timestamp
+    #
+    # 24:00 is represented as midnight on the following day.
+    # The selected date and model input features remain unchanged.
+    # ----------------------------------------------------
+    if hours_display == 24:
+        observation_dt = selected_date + timedelta(days=1)
+    else:
+        observation_dt = selected_date.replace(hour=hours_display)
+
+    # ----------------------------------------------------
+    # 5. Validate chronological order and exact 6-hour interval
+    # ----------------------------------------------------
+    if previous_dt is not None:
+        elapsed_hours = (
+            observation_dt - previous_dt
+        ).total_seconds() / 3600.0
+
+        if elapsed_hours <= 0:
+            st.error(
+                "Observation rejected: the selected timestamp must be "
+                "later than the previous observation."
+            )
+            st.stop()
+
+        if elapsed_hours != 6:
+            st.error(
+                f"Observation rejected: the interval from the previous "
+                f"observation ({previous_dt.strftime('%d %b %Y, %H:%M')} UTC) "
+                f"to the selected observation "
+                f"({observation_dt.strftime('%d %b %Y, %H:%M')} UTC) "
+                f"is {elapsed_hours:g} hours. Exactly 6 hours is required."
+            )
+            st.stop()
+
+    # ----------------------------------------------------
+    # 6. Calculate automated TCN features
+    # ----------------------------------------------------
+    try:
+        # Direction from the previous observed location
+        if st.session_state.tcn_track_history:
+            previous_observation = st.session_state.tcn_track_history[-1]
+
+            direction = calculate_bearing(
+                float(previous_observation["Lat"]),
+                float(previous_observation["Lon"]),
+                float(lat),
+                float(lon),
+            )
+        else:
+            direction = 0.0
+
+        # Duration in hours since the first observation
+        duration = (
+            0.0 if first_dt is None
+            else (
+                observation_dt - first_dt
+            ).total_seconds() / 3600.0
         )
 
-    else:
-        try:
-            # ----------------------------------------------------
-            # 1. Validate the selected observation time
-            # ----------------------------------------------------
-            if hours_display not in [6, 12, 18, 24]:
-                st.error("Observation time must be 06:00, 12:00, 18:00, or 24:00 UTC.")
-                st.stop()
+        # Find nearest coastline point and distance
+        nearest_lat, nearest_lon, distance_coast = find_nearest_coast(
+            float(lat),
+            float(lon),
+            COASTLINE_GDF
+        )
 
-            # Construct the selected date and time.
-            # 24:00 is normalized to 00:00 on the following day.
-            selected_date = datetime(year, month, day)
+        # ----------------------------------------------------
+        # 7. Prepare TCN input
+        #
+        # Preserve the selected training convention:
+        # Day = selected calendar day
+        # hrs_corrected = 2400 when 24:00 is selected
+        # ----------------------------------------------------
+        tcn_observation = {
+            "Lat": lat,
+            "Lon": lon,
+            "direction_from_previous": direction,
+            "WS": ws,
+            "CP": cp,
+            "Month": month,
+            "Day": day,
+            "hrs_corrected": hrs_corrected,
+            "Duration": duration,
+            "Season": season,
+            "Nearest_lat": nearest_lat,
+            "Nearest_lon": nearest_lon,
+            "Distance_to_nearest_coast_km": distance_coast,
+            "daysaftermonsoon": days_monsoon
+        }
 
-            if hours_display == 24:
-                observation_dt = selected_date + timedelta(days=1)
-            else:
-                observation_dt = selected_date.replace(
-                    hour=hours_display
-                )
+        # ----------------------------------------------------
+        # 8. Prepare LSTM input
+        # ----------------------------------------------------
+        lstm_observation = {
+            "Lat": lat,
+            "Lon": lon,
+            "CP": cp,
+            "WS": ws,
+            "Year": year,
+            "Month": month,
+            "Day": day,
+            "hrs_corrected": hrs_corrected,
+            "Gradeno": gradeno,
+            "season": season
+        }
 
-            previous_dt = st.session_state.tcn_last_observation_datetime
-            first_dt = st.session_state.tcn_first_observation_datetime
+        # ----------------------------------------------------
+        # 9. Save observations only after validation succeeds
+        # ----------------------------------------------------
+        if first_dt is None:
+            st.session_state.tcn_first_observation_datetime = observation_dt
 
-            # ----------------------------------------------------
-            # 2. Validate strict chronological order and 6-hour gap
-            # ----------------------------------------------------
-            if previous_dt is not None:
-                elapsed_hours = (
-                    observation_dt - previous_dt
-                ).total_seconds() / 3600.0
+        st.session_state.tcn_last_observation_datetime = observation_dt
 
-                if elapsed_hours <= 0:
-                    st.error(
-                        "Invalid observation order. The new observation "
-                        "must be later than the previous observation."
-                    )
-                    st.stop()
+        st.session_state.tcn_track_history.append(tcn_observation)
+        st.session_state.lstm_track_history.append(lstm_observation)
 
-                if elapsed_hours != 6:
-                    st.error(
-                        f"Invalid observation interval: the previous observation "
-                        f"was at {previous_dt.strftime('%d-%m-%Y %H:%M')} UTC, "
-                        f"but the selected observation is at "
-                        f"{observation_dt.strftime('%d-%m-%Y %H:%M')} UTC. "
-                        f"The interval must be exactly 6 hours."
-                    )
-                    st.stop()
+        st.success(
+            f"Observation added successfully: "
+            f"{day:02d} {month_display} {year}, "
+            f"{hours_display:02d}:00 UTC."
+        )
 
-            # ----------------------------------------------------
-            # 3. Calculate automated TCN features
-            # ----------------------------------------------------
-            if st.session_state.tcn_track_history:
-                previous_observation = st.session_state.tcn_track_history[-1]
+        st.caption(
+            f"Actual timestamp used for interval calculations: "
+            f"{observation_dt.strftime('%d %b %Y, %H:%M')} UTC."
+        )
 
-                direction = calculate_bearing(
-                    float(previous_observation["Lat"]),
-                    float(previous_observation["Lon"]),
-                    float(lat),
-                    float(lon),
-                )
-            else:
-                direction = 0.0
+        st.caption(
+            f"Automated TCN features — direction: {direction:.2f}°, "
+            f"duration: {duration:.2f} h, nearest coast: "
+            f"({nearest_lat:.4f}°, {nearest_lon:.4f}°), "
+            f"distance: {distance_coast:.2f} km."
+        )
 
-            duration = (
-                0.0 if first_dt is None
-                else (
-                    observation_dt - first_dt
-                ).total_seconds() / 3600.0
-            )
-
-            nearest_lat, nearest_lon, distance_coast = find_nearest_coast(
-                float(lat), float(lon), COASTLINE_GDF
-            )
-
-            # ----------------------------------------------------
-            # 4. Prepare TCN input
-            # ----------------------------------------------------
-            tcn_observation = {
-                "Lat": lat,
-                "Lon": lon,
-                "direction_from_previous": direction,
-                "WS": ws,
-                "CP": cp,
-                "Month": month,
-                "Day": day,
-                "hrs_corrected": hrs_corrected,
-                "Duration": duration,
-                "Season": season,
-                "Nearest_lat": nearest_lat,
-                "Nearest_lon": nearest_lon,
-                "Distance_to_nearest_coast_km": distance_coast,
-                "daysaftermonsoon": days_monsoon
-            }
-
-            # ----------------------------------------------------
-            # 5. Prepare LSTM input
-            # ----------------------------------------------------
-            lstm_observation = {
-                "Lat": lat,
-                "Lon": lon,
-                "CP": cp,
-                "WS": ws,
-                "Year": year,
-                "Month": month,
-                "Day": day,
-                "hrs_corrected": hrs_corrected,
-                "Gradeno": gradeno,
-                "season": season
-            }
-
-            # ----------------------------------------------------
-            # 6. Save observation only after all validations succeed
-            # ----------------------------------------------------
-            if first_dt is None:
-                st.session_state.tcn_first_observation_datetime = observation_dt
-
-            st.session_state.tcn_last_observation_datetime = observation_dt
-            st.session_state.tcn_track_history.append(tcn_observation)
-            st.session_state.lstm_track_history.append(lstm_observation)
-
-            st.success(
-                f"Observation added for "
-                f"{observation_dt.strftime('%d %b %Y, %H:%M')} UTC."
-            )
-
-            st.caption(
-                f"Automated TCN features — direction: {direction:.2f}°, "
-                f"duration: {duration:.2f} h, nearest coast: "
-                f"({nearest_lat:.4f}°, {nearest_lon:.4f}°), "
-                f"distance: {distance_coast:.2f} km."
-            )
-
-        except Exception as exc:
-            st.error(f"Could not calculate automated TCN inputs: {exc}")
+    except Exception as exc:
+        st.error(
+            f"Could not calculate automated TCN inputs: {exc}"
+        )
 
 # ============================================================
 # 12. DISPLAY SHARED OBSERVATION HISTORY
