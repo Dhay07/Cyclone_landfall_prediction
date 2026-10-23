@@ -279,19 +279,24 @@ def show_about():
 # 6. TITLE
 # ============================================================
 
-left_space, center_col, right_space = st.columns([0.5, 3, 0.5])
+st.markdown(
+    """
+    <h1 style="text-align: center;">
+        🌀 Cyclone Landfall Prediction - Bay of Bengal
+    </h1>
+    <p style="text-align: center; font-size: 16px;">
+        Research-based tropical cyclone prediction using
+        deep-learning models.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+_, center_col, _ = st.columns([1, 1, 1])
 
 with center_col:
-    st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
-
-    st.write(
-        "Research-based tropical cyclone prediction using "
-        "deep-learning models."
-    )
-
-    if st.button("ℹ️ About the Models"):
+    if st.button("ℹ️ About the Models", use_container_width=True):
         show_about()
-st.divider()
 
 
 # ============================================================
