@@ -503,8 +503,8 @@ with content_col:
     # 12. DISPLAY SHARED OBSERVATION HISTORY
     # ============================================================
 
-       st.divider()
-       st.subheader("Observation History")
+        st.divider()
+        st.subheader("Observation History")
 
     # Use one history for display to avoid duplicate observations.
     # LSTM history contains all eight shared observation fields.
