@@ -544,13 +544,15 @@ with common_col3:
         7: "Super cyclonic storm"
     }
 
-    st.metric("Grade Number", gradeno)
+    st.metric("Category Number", gradeno)
 
-    st.markdown(
-             f"""
+st.markdown(
+    f"""
     <div style="
-        background-color: #EAF2F8;
-        border-left: 5px solid #2874A6;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #FDEDEC;
+        border-left: 5px solid #C0392B;
         border-radius: 8px;
         padding: 12px 14px;
         margin-top: 5px;
@@ -559,19 +561,19 @@ with common_col3:
     ">
         <div style="
             font-size: 12px;
-            color: #526575;
+            color: #922B21;
             font-weight: 600;
             margin-bottom: 4px;
         ">CYCLONE CATEGORY</div>
         <div style="
             font-size: 16px;
-            color: #1B4F72;
+            color: #C0392B;
             font-weight: 700;
         ">{grade_names[gradeno]}</div>
     </div>
     """,
     unsafe_allow_html=True
-    )
+)
 
 # ============================================================
 # 9. TCN-SPECIFIC INPUTS
@@ -585,8 +587,7 @@ with tcn_col1[0]:
         "Days After Monsoon Onset",
         "tcn_days_monsoon",
         "Number of days between Kerala southwest monsoon onset "
-        "and cyclone genesis. Use the same sign convention as "
-        "the TCN training data.",
+        "and cyclone genesis. Check IMD official website.",
         value=0.0,
         format="%.4f"
     )
