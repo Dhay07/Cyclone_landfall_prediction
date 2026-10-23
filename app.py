@@ -546,6 +546,16 @@ with common_col3:
 
     st.metric("Category Number", gradeno)
 
+    days_monsoon = add_input(
+        "Days After Monsoon Onset",
+        "tcn_days_monsoon",
+        "Number of days between Kerala southwest monsoon onset "
+        "and cyclone genesis. Check IMD official website.",
+        value=0.0,
+        format="%.4f"
+    )
+
+
 st.markdown(
     f"""
     <div style="
@@ -577,22 +587,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ============================================================
-# 9. TCN-SPECIFIC INPUTS
-# ============================================================
-
-st.divider()
-tcn_col1 = st.columns(1)
-
-with tcn_col1[0]:
-    days_monsoon = add_input(
-        "Days After Monsoon Onset",
-        "tcn_days_monsoon",
-        "Number of days between Kerala southwest monsoon onset "
-        "and cyclone genesis. Check IMD official website.",
-        value=0.0,
-        format="%.4f"
-    )
 
 # Load the coastline data once and cache it. The dataset must have a valid CRS.
 try:
