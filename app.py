@@ -546,8 +546,9 @@ with common_col3:
 
     st.markdown(
     f"""
-    <div style="font-size: 12px; margin-top: 8px;">
-        <strong>Grade Number:</strong> {gradeno}
+    <div style="font-size: 18px; margin-top: 8px;">
+        <strong>Grade Number:
+        </strong> {gradeno}
     </div>
     """,
     unsafe_allow_html=True
