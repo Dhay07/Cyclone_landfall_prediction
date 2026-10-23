@@ -837,49 +837,6 @@ if lstm_history:
 else:
     st.info("No observations have been added yet.")
 
-# ============================================================
-# 13. TCN LANDfall PREDICTION
-# ============================================================
-
-st.divider()
-st.header("Predicted landfall location")
-
-st.caption(
-    f"Model version: {TCN_CONFIG['model_version']}"
-)
-
-tcn_track_df = pd.DataFrame(
-    st.session_state.tcn_track_history
-)
-
-if len(tcn_track_df) >= 2:
-
-    try:
-        tcn_result = predict_tcn(tcn_track_df)
-
-        pred_col1, pred_col2 = st.columns(2)
-
-        with pred_col1:
-            st.metric(
-                "Predicted Landfall Latitude",
-                f"{tcn_result['predicted_landfall_lat']:.4f}°"
-            )
-
-        with pred_col2:
-            st.metric(
-                "Predicted Landfall Longitude",
-                f"{tcn_result['predicted_landfall_lon']:.4f}°"
-            )
-
-    except Exception as e:
-        st.error(f"TCN prediction error: {e}")
-
-else:
-    st.info(
-        "Add at least two cyclone observations to generate "
-        "the TCN landfall prediction."
-    )
-
 
 # ============================================================
 # 14. LSTM TRACK PREDICTION
@@ -927,6 +884,49 @@ else:
     st.info(
         "Add at least two cyclone observations to generate "
         "the LSTM track prediction."
+    )
+
+# ============================================================
+# 13. TCN LANDfall PREDICTION
+# ============================================================
+
+st.divider()
+st.header("Predicted landfall location")
+
+st.caption(
+    f"Model version: {TCN_CONFIG['model_version']}"
+)
+
+tcn_track_df = pd.DataFrame(
+    st.session_state.tcn_track_history
+)
+
+if len(tcn_track_df) >= 2:
+
+    try:
+        tcn_result = predict_tcn(tcn_track_df)
+
+        pred_col1, pred_col2 = st.columns(2)
+
+        with pred_col1:
+            st.metric(
+                "Predicted Landfall Latitude",
+                f"{tcn_result['predicted_landfall_lat']:.4f}°"
+            )
+
+        with pred_col2:
+            st.metric(
+                "Predicted Landfall Longitude",
+                f"{tcn_result['predicted_landfall_lon']:.4f}°"
+            )
+
+    except Exception as e:
+        st.error(f"TCN prediction error: {e}")
+
+else:
+    st.info(
+        "Add at least two cyclone observations to generate "
+        "the TCN landfall prediction."
     )
 
 
