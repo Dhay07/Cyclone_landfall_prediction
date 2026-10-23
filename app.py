@@ -1169,5 +1169,5 @@ st.caption(
 )
 
 st.caption(
-    "© 2026 Cyclone Landfall Prediction | Research and educational use"
+    "© 2026 Cyclone Landfall Prediction | Research and educational use only"
 )
