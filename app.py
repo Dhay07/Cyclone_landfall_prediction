@@ -510,7 +510,7 @@ with content_col:
     # LSTM history contains all eight shared observation fields.
        lstm_history = st.session_state.lstm_track_history
 
-       if lstm_history:
+        if lstm_history:
            observation_df = pd.DataFrame(lstm_history)
 
         # Convert the stored model time (e.g. 600.0) to HH:MM.
