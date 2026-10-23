@@ -295,7 +295,7 @@ st.markdown(
 _, center_col, _ = st.columns([1, 1, 1])
 
 with center_col:
-    if st.button("ℹ️ About the Models", use_container_width=True):
+    if st.button("ℹ️ About", use_container_width=True):
         show_about()
 
 
