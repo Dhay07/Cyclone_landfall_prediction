@@ -958,20 +958,16 @@ if st.session_state.show_predictions:
 
             try:
                 lstm_result = predict_lstm(lstm_track_df)
-
-                st.metric(
+                lat_col, lon_col = st.columns(2)
+                with lat_col:
+                   st.metric(
                     "Predicted Latitude",
-                    f"{lstm_result['predicted_lat']:.4f}°"
+                    f"{lstm_result['predicted_lat']:.4f}DD"
                 )
-
-                st.metric(
+                with lon_col
+                   st.metric(
                     "Predicted Longitude",
-                    f"{lstm_result['predicted_lon']:.4f}°"
-                )
-
-                st.caption(
-                    "Prediction horizon: "
-                    f"{LSTM_CONFIG['prediction_horizon_hours']} hours ahead."
+                    f"{lstm_result['predicted_lon']:.4f}DD"
                 )
 
             except Exception as e:
