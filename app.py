@@ -544,6 +544,15 @@ with common_col3:
         7: "Super Cyclonic Storm (SuCS)"
     }
 
+    days_monsoon = add_input(
+        "Days After Monsoon Onset",
+        "tcn_days_monsoon",
+        "Number of days between Kerala southwest monsoon onset "
+        "and cyclone genesis. Check IMD official website.",
+        value=0.0,
+        format="%.4f"
+    )
+
     st.markdown(
     f"""
     <div style="font-size: 18px; margin-top: 8px;">
@@ -554,17 +563,6 @@ with common_col3:
     unsafe_allow_html=True
     )
     
-
-    days_monsoon = add_input(
-        "Days After Monsoon Onset",
-        "tcn_days_monsoon",
-        "Number of days between Kerala southwest monsoon onset "
-        "and cyclone genesis. Check IMD official website.",
-        value=0.0,
-        format="%.4f"
-    )
-
-
 st.markdown(
     f"""
     <div style="
