@@ -964,7 +964,7 @@ if st.session_state.show_predictions:
                     "Predicted Latitude",
                     f"{lstm_result['predicted_lat']:.4f}DD"
                 )
-                with lon_col
+                with lon_col:
                    st.metric(
                     "Predicted Longitude",
                     f"{lstm_result['predicted_lon']:.4f}DD"
