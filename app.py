@@ -283,7 +283,7 @@ st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
 
 st.write(
     "Research-based tropical cyclone prediction using "
-    "TCN and LSTM deep-learning models."
+    "deep-learning models."
 )
 
 if st.button("ℹ️ About the Models"):
@@ -987,13 +987,60 @@ if st.session_state.show_predictions:
 
 
 # ============================================================
-# 16. DISCLAIMER
+# 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
 # ============================================================
 
 st.divider()
 
+about_col, contact_col, links_col = st.columns(3)
+
+with about_col:
+    with st.expander("ℹ️ About"):
+        st.markdown("""
+        **Cyclone Landfall Prediction — Bay of Bengal**
+
+        This research application uses Temporal Convolutional
+        Network (TCN) and Long Short-Term Memory (LSTM) models
+        to predict tropical cyclone characteristics over the
+        Bay of Bengal.
+
+        The TCN estimates the landfall location, while the LSTM
+        predicts the cyclone's future track position.
+
+        The application is intended for research and
+        educational purposes.
+        """)
+
+with contact_col:
+    with st.expander("✉️ Contact"):
+        st.markdown("""
+        For questions, feedback, or research collaboration,
+        please contact the researcher.
+
+        - **Researcher:** [Your Name]
+        - **Email:** [your.email@example.com]
+        - **Institution:** [Your Institution]
+        """)
+
+with links_col:
+    with st.expander("🔗 External Links"):
+        st.markdown("""
+        - [India Meteorological Department (IMD)](https://mausam.imd.gov.in/)
+        - [RSMC New Delhi](https://rsmcnewdelhi.imd.gov.in/)
+        - [Windy — Weather Maps](https://www.windy.com/)
+        - [NOAA Climate Indices](https://www.cpc.ncep.noaa.gov/data/indices/)
+        """)
+
+st.divider()
+
 st.caption(
-    "This application presents predictions from research-based "
-    "machine-learning models. It is not an official cyclone "
-    "warning or forecasting service."
+    "Disclaimer: This application presents predictions from "
+    "research-based machine-learning models. It is not an official "
+    "cyclone warning or forecasting service. Predictions must not "
+    "be used as a substitute for official forecasts, advisories, "
+    "or warnings issued by the IMD or other authorized agencies."
+)
+
+st.caption(
+    "© 2026 Cyclone Landfall Prediction | Research and educational use"
 )
