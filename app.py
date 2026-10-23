@@ -544,15 +544,7 @@ with common_col3:
         7: "Super Cyclonic Storm (SuCS)"
     }
 
-    st.markdown(
-    f"""
-    <div style="font-size: 16px; margin-top: 8px;">
-        <strong>Grade Number:</strong> {gradeno}
-    </div>
-    """,
-    unsafe_allow_html=True
-    )
-
+    st.metric("Category Number", gradeno)
     days_monsoon = add_input(
         "Days After Monsoon Onset",
         "tcn_days_monsoon",
