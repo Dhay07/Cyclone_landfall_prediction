@@ -29,7 +29,7 @@ from predict_lstm import predict_landfall as predict_lstm
 # ============================================================
 
 st.set_page_config(
-    page_title="Cyclone Landfall Prediction",
+    page_title="Cyclone Landfall Prediction-BoB",
     page_icon="🌀",
     layout="wide"
 )
@@ -279,16 +279,18 @@ def show_about():
 # 6. TITLE
 # ============================================================
 
-st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
+left_space, center_col, right_space = st.columns([1, 3, 1])
 
-st.write(
-    "Research-based tropical cyclone prediction using "
-    "deep-learning models."
-)
+with center_col:
+    st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
 
-if st.button("ℹ️ About the Models"):
-    show_about()
+    st.write(
+        "Research-based tropical cyclone prediction using "
+        "deep-learning models."
+    )
 
+    if st.button("ℹ️ About the Models"):
+        show_about()
 st.divider()
 
 
