@@ -23,19 +23,6 @@ except ImportError as exc:
 
 from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
-from pathlib import Path
-import geopandas as gpd
-
-BASE_DIR = Path(__file__).resolve().parent
-COASTLINE_PATH = BASE_DIR / "data" / "coastline.shp"
-
-coastline = gpd.read_file(COASTLINE_PATH)
-
-if coastline.crs is None:
-    raise ValueError(
-        "Coastline data has no CRS. "
-        "Check the coastline.prj file."
-    )
 
 # ============================================================
 # 1. PAGE CONFIGURATION
