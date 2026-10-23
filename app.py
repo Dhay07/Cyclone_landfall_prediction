@@ -926,6 +926,7 @@ with content_col:
                 f"({nearest_lat:.4f}°, {nearest_lon:.4f}°), "
                 f"distance: {distance_coast:.2f} km."
             )
+            st.rerun()
 
         except Exception as exc:
             st.error(
