@@ -446,14 +446,14 @@ time_col, date_col = st.columns(2)
 with time_col:
     hours_display = st.selectbox(
         "Time (UTC)",
-        options=[6, 12, 18, 24],
-        index=0,
+        options=[0, 6, 12, 18],
+        index=1,
         format_func=lambda x: f"{x:02d}:00",
         key="obs_hours"
     )
 
-    # Convert displayed hours to the model's expected representation.
-    hrs_corrected = float(hours_display * 100)
+    # Convert displayed time to the model's expected representation.
+    hrs_corrected = float(2400 if hours_display == 0 else hours_display * 100)
 
 with date_col:
     st.metric(
@@ -603,7 +603,6 @@ if COASTLINE_LOAD_ERROR:
 
 st.divider()
 
-
 submitted = st.button(
     "Add Observation and Update Predictions",
     type="primary",
@@ -630,9 +629,9 @@ if submitted:
         )
         st.stop()
 
-    if hours_display not in [6, 12, 18, 24]:
+    if hours_display not in [0, 6, 12, 18]:
         st.error(
-            "Observation time must be 06:00, 12:00, 18:00, or 24:00 UTC."
+            "Observation time must be 00:00, 06:00, 12:00, or 18:00 UTC."
         )
         st.stop()
 
@@ -642,36 +641,15 @@ if submitted:
     previous_dt = st.session_state.tcn_last_observation_datetime
     first_dt = st.session_state.tcn_first_observation_datetime
 
+    # ----------------------------------------------------
+    # 3. Construct the actual timestamp
+    # 00:00 means midnight on the selected calendar date
+    # ----------------------------------------------------
     selected_date = datetime(year, month, day)
+    observation_dt = selected_date.replace(hour=hours_display)
 
     # ----------------------------------------------------
-    # 3. If 24:00 is selected, require the next calendar date
-    # ----------------------------------------------------
-    if hours_display == 24 and previous_dt is not None:
-        expected_date = previous_dt.date() + timedelta(days=1)
-        selected_calendar_date = selected_date.date()
-
-        if selected_calendar_date != expected_date:
-            st.error(
-                "When selecting 24:00, change the date to the next "
-                "calendar day. For example, after 23 Oct 2026 at 18:00, "
-                "select 24 Oct 2026 and 24:00."
-            )
-            st.stop()
-
-    # ----------------------------------------------------
-    # 4. Construct the actual timestamp
-    #
-    # 24:00 is represented as midnight on the following day.
-    # The selected date and model input features remain unchanged.
-    # ----------------------------------------------------
-    if hours_display == 24:
-        observation_dt = selected_date + timedelta(days=1)
-    else:
-        observation_dt = selected_date.replace(hour=hours_display)
-
-    # ----------------------------------------------------
-    # 5. Validate chronological order and exact 6-hour interval
+    # 4. Validate chronological order and exact 6-hour interval
     # ----------------------------------------------------
     if previous_dt is not None:
         elapsed_hours = (
