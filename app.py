@@ -1017,9 +1017,9 @@ with contact_col:
         For questions, feedback, or research collaboration,
         please contact the researcher.
 
-        - **Researcher:** [Your Name]
-        - **Email:** [your.email@example.com]
-        - **Institution:** [Your Institution]
+        - **Developer:** Dhayanand J
+        - **Email:** dhayanand06@gmail.com
+        - **Institution:** SASTRA Deemed University
         """)
 
 with links_col:
@@ -1027,8 +1027,6 @@ with links_col:
         st.markdown("""
         - [India Meteorological Department (IMD)](https://mausam.imd.gov.in/)
         - [RSMC New Delhi](https://rsmcnewdelhi.imd.gov.in/)
-        - [Windy — Weather Maps](https://www.windy.com/)
-        - [NOAA Climate Indices](https://www.cpc.ncep.noaa.gov/data/indices/)
         """)
 
 st.divider()
