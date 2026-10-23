@@ -322,11 +322,11 @@ if dark_mode:
     border_color = "#34445A"
     input_color = "#202B3A"
 else:
-    bg_color = "#FFFFFF"
-    text_color = "#202B3A"
-    panel_color = "#F3F7FC"
-    border_color = "#D5DFEA"
-    input_color = "#FFFFFF"
+    bg_color = "#F4F7FB"       # Soft blue-gray page background
+    text_color = "#243247"     # Dark navy text
+    panel_color = "#FFFFFF"    # Clean white panels
+    border_color = "#D8E1ED"   # Subtle blue-gray borders
+    input_color = "#FFFFFF"    # White input fields
 
 st.markdown(
     f"""
