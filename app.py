@@ -554,7 +554,7 @@ with content_col:
                use_container_width=True,
                hide_index=True
            )
-           else:
+        else:
               st.info("No observations have been added yet.")
 
     # ============================================================
