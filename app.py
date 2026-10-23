@@ -756,8 +756,8 @@ with content_col:
         st.session_state.tcn_predicted_lat = None
         st.session_state.tcn_predicted_lon = None
 
-    st.session_state.show_predictions = False
-    st.rerun()
+        st.session_state.show_predictions = False
+        st.rerun()
 
     # A prediction is requested only when the Predict button is clicked.
     if predict_clicked:
