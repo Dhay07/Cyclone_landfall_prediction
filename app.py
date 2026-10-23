@@ -508,7 +508,7 @@ with content_col:
 
     # Use one history for display to avoid duplicate observations.
     # LSTM history contains all eight shared observation fields.
-       lstm_history = st.session_state.lstm_track_history
+        lstm_history = st.session_state.lstm_track_history
 
         if lstm_history:
            observation_df = pd.DataFrame(lstm_history)
