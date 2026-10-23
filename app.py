@@ -550,24 +550,25 @@ st.markdown(
     f"""
     <div style="
         width: fit-content;
+        min-width: 320px;
         max-width: 90%;
         box-sizing: border-box;
         background-color: #FEF2F2;
         border: 1px solid #DC2626;
-        border-left: 5px solid #DC2626;
-        border-radius: 8px;
-        padding: 10px 22px;
-        margin: 8px auto 12px auto;
+        border-left: 6px solid #DC2626;
+        border-radius: 10px;
+        padding: 18px 35px;
+        margin: 10px auto 16px auto;
         text-align: center;
     ">
         <div style="
-            font-size: 12px;
+            font-size: 14px;
             color: #B91C1C;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         ">⚠️ CYCLONE CATEGORY</div>
         <div style="
-            font-size: 16px;
+            font-size: 20px;
             color: #991B1B;
             font-weight: 700;
         ">{grade_names[gradeno]}</div>
