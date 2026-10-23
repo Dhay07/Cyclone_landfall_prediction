@@ -992,24 +992,7 @@ if st.session_state.show_predictions:
 
 st.divider()
 
-about_col, contact_col, links_col = st.columns(3)
-
-with about_col:
-    with st.expander("ℹ️ About"):
-        st.markdown("""
-        **Cyclone Landfall Prediction — Bay of Bengal**
-
-        This research application uses Temporal Convolutional
-        Network (TCN) and Long Short-Term Memory (LSTM) models
-        to predict tropical cyclone characteristics over the
-        Bay of Bengal.
-
-        The TCN estimates the landfall location, while the LSTM
-        predicts the cyclone's future track position.
-
-        The application is intended for research and
-        educational purposes.
-        """)
+contact_col, links_col = st.columns(2)
 
 with contact_col:
     with st.expander("✉️ Contact"):
