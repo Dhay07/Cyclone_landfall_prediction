@@ -996,7 +996,7 @@ st.divider()
 center_col, contact_col, links_col = st.columns(3)
 
 with center_col:
-    if st.button("ℹ️ About", use_container_width=True, type="tertiary"):
+    if st.button("ℹ️ About", use_container_width=True, type="secondary"):
         show_about()
 
 with contact_col:
