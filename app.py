@@ -292,13 +292,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-_, center_col, _ = st.columns([1, 1, 1])
-
-with center_col:
-    if st.button("ℹ️ About", use_container_width=True):
-        show_about()
-
-
 # ============================================================
 # 7. INITIALIZE SEPARATE MODEL HISTORIES
 # ============================================================
@@ -1002,7 +995,11 @@ with content_col:
 
 st.divider()
 
-contact_col, links_col = st.columns(2)
+center_col, contact_col, links_col = st.columns(3)
+
+with center_col:
+    if st.button("ℹ️ About", use_container_width=True):
+        show_about()
 
 with contact_col:
     with st.expander("✉️ Contact"):
