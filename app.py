@@ -6,6 +6,30 @@ import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import math
+st.markdown(
+    """
+    <style>
+        [data-testid="stToolbar"] {
+            visibility: hidden;
+            height: 0%;
+            position: fixed;
+        }
+
+        [data-testid="stDecoration"] {
+            display: none;
+        }
+
+        #MainMenu {
+            visibility: hidden;
+        }
+
+        footer {
+            visibility: hidden;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 # Optional geospatial dependencies are required for automatic coastline features.
 try:
     import geopandas as gpd
@@ -31,151 +55,6 @@ st.set_page_config(
     page_title="Cyclone Landfall Prediction-BoB",
     page_icon="🌀",
     layout="wide"
-)
-
-
-# ============================================================
-# VISUAL THEME — CLEAN METEOROLOGICAL DASHBOARD
-# ============================================================
-
-st.markdown(
-    """
-    <style>
-        :root {
-            --cyclone-blue: #1f5f8b;
-            --cyclone-deep: #12334d;
-            --cyclone-pale: #edf5fb;
-            --cyclone-border: #d5e2ed;
-            --cyclone-text: #203447;
-        }
-
-        /* Keep the page clean and hide Streamlit chrome */
-        [data-testid="stToolbar"] { visibility: hidden; height: 0; }
-        [data-testid="stDecoration"] { display: none; }
-        #MainMenu, footer { visibility: hidden; }
-
-        .stApp {
-            background: linear-gradient(180deg, #f5f9fc 0%, #ffffff 38%);
-            color: var(--cyclone-text);
-        }
-
-        [data-testid="stAppViewContainer"] .main .block-container {
-            padding-top: 1.7rem;
-            padding-bottom: 2.2rem;
-            max-width: 1440px;
-        }
-
-        h1, h2, h3 {
-            color: var(--cyclone-deep);
-            letter-spacing: -0.025em;
-        }
-        h2 { margin-top: 0.65rem; }
-
-        /* Main title banner */
-        .cyclone-hero {
-            padding: 1.65rem 1.5rem 1.45rem;
-            margin: 0 auto 1.8rem;
-            text-align: center;
-            border: 1px solid #d4e4f1;
-            border-radius: 20px;
-            background: linear-gradient(120deg, #eaf4fb 0%, #f8fbfe 52%, #e7f1f9 100%);
-            box-shadow: 0 8px 24px rgba(25, 70, 105, 0.08);
-        }
-        .cyclone-hero h1 {
-            margin: 0;
-            font-size: clamp(1.7rem, 3vw, 2.5rem);
-            font-weight: 750;
-            line-height: 1.25;
-            color: #123b5a;
-        }
-        .cyclone-hero p {
-            margin: 0.65rem 0 0;
-            color: #49677d;
-            font-size: 1.03rem;
-        }
-
-        /* Inputs and selection controls */
-        [data-testid="stTextInput"] input,
-        [data-testid="stNumberInput"] input,
-        [data-testid="stSelectbox"] [data-baseweb="select"] > div,
-        [data-testid="stDateInput"] input {
-            border-radius: 10px;
-        }
-        [data-testid="stNumberInput"] input:focus,
-        [data-testid="stTextInput"] input:focus {
-            border-color: var(--cyclone-blue);
-            box-shadow: 0 0 0 1px var(--cyclone-blue);
-        }
-        label, [data-testid="stWidgetLabel"] p {
-            color: #314d63;
-            font-weight: 550;
-        }
-
-        /* Buttons */
-        .stButton > button {
-            border-radius: 10px;
-            min-height: 2.65rem;
-            font-weight: 600;
-            transition: border-color 120ms ease, transform 120ms ease;
-        }
-        .stButton > button:hover {
-            border-color: #2b6f9f;
-            transform: translateY(-1px);
-        }
-        .stButton > button[kind="primary"] {
-            background: linear-gradient(100deg, #1f5f8b, #287eaa);
-            border: 1px solid #1f5f8b;
-            color: #ffffff;
-        }
-
-        /* Prediction metric cards */
-        [data-testid="stMetric"] {
-            background: #ffffff;
-            border: 1px solid var(--cyclone-border);
-            border-radius: 14px;
-            padding: 1rem 1.1rem;
-            box-shadow: 0 4px 14px rgba(24, 65, 95, 0.055);
-        }
-        [data-testid="stMetricLabel"] p {
-            color: #527087;
-            font-weight: 600;
-        }
-        [data-testid="stMetricValue"] {
-            color: #174f76;
-            font-weight: 750;
-        }
-
-        /* History table, expanders and dividers */
-        [data-testid="stDataFrame"] {
-            border: 1px solid var(--cyclone-border);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        [data-testid="stExpander"] {
-            border: 1px solid var(--cyclone-border);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.8);
-        }
-        hr {
-            border-color: #dce7ef;
-            margin-top: 1.35rem;
-            margin-bottom: 1.35rem;
-        }
-        [data-testid="stCaptionContainer"] {
-            color: #637b8c;
-        }
-
-        /* Keep layout comfortable on narrow screens */
-        @media (max-width: 768px) {
-            [data-testid="stAppViewContainer"] .main .block-container {
-                padding: 1rem 0.8rem 1.5rem;
-            }
-            .cyclone-hero { padding: 1.2rem 0.8rem; border-radius: 14px; }
-            .cyclone-hero p { font-size: 0.95rem; }
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
 )
 
 
@@ -423,10 +302,13 @@ def show_about():
 
 st.markdown(
     """
-    <div class="cyclone-hero">
-        <h1>🌀 Cyclone Landfall Prediction</h1>
-        <p>Bay of Bengal · Research-based tropical cyclone prediction using deep-learning models</p>
-    </div>
+    <h1 style="text-align: center;">
+        🌀 Cyclone Landfall Prediction - Bay of Bengal
+    </h1>
+    <p style="text-align: center; font-size: 16px;">
+        Research-based tropical cyclone prediction using
+        deep-learning models.
+    </p>
     """,
     unsafe_allow_html=True
 )
