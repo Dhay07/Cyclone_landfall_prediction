@@ -571,13 +571,13 @@ st.markdown(
         text-align: center;
     ">
         <div style="
-            font-size: 14px;
+            font-size: 16px;
             color: #B91C1C;
             font-weight: 700;
             margin-bottom: 8px;
         ">⚠️ CYCLONE CATEGORY</div>
         <div style="
-            font-size: 20px;
+            font-size: 22px;
             color: #991B1B;
             font-weight: 700;
         ">{grade_names[gradeno]}</div>
