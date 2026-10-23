@@ -842,7 +842,7 @@ else:
 # ============================================================
 
 st.divider()
-st.header("TCN — Landfall Prediction")
+st.header("Predicted landfall location")
 
 st.caption(
     f"Model version: {TCN_CONFIG['model_version']}"
@@ -886,7 +886,7 @@ else:
 # ============================================================
 
 st.divider()
-st.header("LSTM — Track Prediction")
+st.header("Predicted track 12 h ahead")
 
 st.caption(
     f"Model version: {LSTM_CONFIG['model_version']}"
