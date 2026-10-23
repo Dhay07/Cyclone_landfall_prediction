@@ -598,16 +598,64 @@ if COASTLINE_LOAD_ERROR:
 
 
 # ============================================================
-# 11. ADD OBSERVATION
+# 11. OBSERVATION, PREDICT AND RESET BUTTONS
 # ============================================================
 
 st.divider()
 
-submitted = st.button(
-    "Add Observation and Update Predictions",
-    type="primary",
-    use_container_width=True
-)
+add_col, predict_col, reset_col = st.columns([2, 1, 1])
+
+with add_col:
+    submitted = st.button(
+        "Add Observation",
+        type="primary",
+        use_container_width=True
+    )
+
+with predict_col:
+    predict_clicked = st.button(
+        "Predict",
+        use_container_width=True
+    )
+
+with reset_col:
+    reset_clicked = st.button(
+        "Reset",
+        use_container_width=True
+    )
+
+# Keep prediction results hidden until the user clicks Predict.
+if "show_predictions" not in st.session_state:
+    st.session_state.show_predictions = False
+
+# Reset both model histories and all associated timestamps.
+if reset_clicked:
+    st.session_state.tcn_track_history = []
+    st.session_state.lstm_track_history = []
+    st.session_state.tcn_first_observation_datetime = None
+    st.session_state.tcn_last_observation_datetime = None
+    st.session_state.show_predictions = False
+    st.rerun()
+
+# A prediction is requested only when the Predict button is clicked.
+if predict_clicked:
+    lstm_min_observations = int(LSTM_CONFIG.get("window_size", 2))
+    tcn_min_observations = 2
+
+    if len(st.session_state.lstm_track_history) < lstm_min_observations:
+        st.session_state.show_predictions = False
+        st.warning(
+            f"Add at least {lstm_min_observations} observations before "
+            "generating the LSTM track prediction."
+        )
+    elif len(st.session_state.tcn_track_history) < tcn_min_observations:
+        st.session_state.show_predictions = False
+        st.warning(
+            f"Add at least {tcn_min_observations} observations before "
+            "generating the TCN landfall prediction."
+        )
+    else:
+        st.session_state.show_predictions = True
 
 if submitted:
     # ----------------------------------------------------
@@ -710,7 +758,7 @@ if submitted:
         #
         # Preserve the selected training convention:
         # Day = selected calendar day
-        # hrs_corrected = 2400 when 24:00 is selected
+        # hrs_corrected = 2400 for the displayed 00:00 time.
         # ----------------------------------------------------
         tcn_observation = {
             "Lat": lat,
@@ -755,6 +803,8 @@ if submitted:
 
         st.session_state.tcn_track_history.append(tcn_observation)
         st.session_state.lstm_track_history.append(lstm_observation)
+        # A newly added observation invalidates previously displayed predictions.
+        st.session_state.show_predictions = False
 
         st.success(
             f"Observation added successfully: "
@@ -800,7 +850,7 @@ if lstm_history:
 
         value = int(value)
         if value == 2400:
-           return "00:00"
+            return "00:00"
         hours = value // 100
         minutes = value % 100
         return f"{hours:02d}:{minutes:02d}"
@@ -837,118 +887,104 @@ if lstm_history:
 else:
     st.info("No observations have been added yet.")
 
-
 # ============================================================
-# 14. LSTM TRACK PREDICTION
+# 13. MODEL PREDICTIONS — SHOWN ONLY AFTER CLICKING PREDICT
 # ============================================================
 
-st.divider()
-st.header("Predicted track 12 h ahead")
+if st.session_state.show_predictions:
 
-st.caption(
-    f"Model version: {LSTM_CONFIG['model_version']}"
-)
+    # ============================================================
+    # 14. LSTM TRACK PREDICTION
+    # ============================================================
 
-lstm_track_df = pd.DataFrame(
-    st.session_state.lstm_track_history
-)
+    st.divider()
+    st.header("Predicted track 12 h ahead")
 
-if len(lstm_track_df) >= LSTM_CONFIG["window_size"]:
+    st.caption(
+        f"Model version: {LSTM_CONFIG['model_version']}"
+    )
 
-    try:
-        lstm_result = predict_lstm(lstm_track_df)
+    lstm_track_df = pd.DataFrame(
+        st.session_state.lstm_track_history
+    )
 
-        pred_col1, pred_col2 = st.columns(2)
+    if len(lstm_track_df) >= LSTM_CONFIG["window_size"]:
 
-        with pred_col1:
-            st.metric(
-                "Predicted Track Latitude",
-                f"{lstm_result['predicted_lat']:.4f}°"
+        try:
+            lstm_result = predict_lstm(lstm_track_df)
+
+            pred_col1, pred_col2 = st.columns(2)
+
+            with pred_col1:
+                st.metric(
+                    "Predicted Track Latitude",
+                    f"{lstm_result['predicted_lat']:.4f}°"
+                )
+
+            with pred_col2:
+                st.metric(
+                    "Predicted Track Longitude",
+                    f"{lstm_result['predicted_lon']:.4f}°"
+                )
+
+            st.caption(
+                "Prediction horizon: "
+                f"{LSTM_CONFIG['prediction_horizon_hours']} hours ahead."
             )
 
-        with pred_col2:
-            st.metric(
-                "Predicted Track Longitude",
-                f"{lstm_result['predicted_lon']:.4f}°"
-            )
+        except Exception as e:
+            st.error(f"LSTM prediction error: {e}")
 
-        st.caption(
-            "Prediction horizon: "
-            f"{LSTM_CONFIG['prediction_horizon_hours']} hours ahead."
+    else:
+        st.info(
+            "Add at least two cyclone observations to generate "
+            "the LSTM track prediction."
         )
 
-    except Exception as e:
-        st.error(f"LSTM prediction error: {e}")
+    # ============================================================
+    # 13. TCN LANDfall PREDICTION
+    # ============================================================
 
-else:
-    st.info(
-        "Add at least two cyclone observations to generate "
-        "the LSTM track prediction."
+    st.divider()
+    st.header("Predicted landfall location")
+
+    st.caption(
+        f"Model version: {TCN_CONFIG['model_version']}"
     )
 
-# ============================================================
-# 13. TCN LANDfall PREDICTION
-# ============================================================
-
-st.divider()
-st.header("Predicted landfall location")
-
-st.caption(
-    f"Model version: {TCN_CONFIG['model_version']}"
-)
-
-tcn_track_df = pd.DataFrame(
-    st.session_state.tcn_track_history
-)
-
-if len(tcn_track_df) >= 2:
-
-    try:
-        tcn_result = predict_tcn(tcn_track_df)
-
-        pred_col1, pred_col2 = st.columns(2)
-
-        with pred_col1:
-            st.metric(
-                "Predicted Landfall Latitude",
-                f"{tcn_result['predicted_landfall_lat']:.4f}°"
-            )
-
-        with pred_col2:
-            st.metric(
-                "Predicted Landfall Longitude",
-                f"{tcn_result['predicted_landfall_lon']:.4f}°"
-            )
-
-    except Exception as e:
-        st.error(f"TCN prediction error: {e}")
-
-else:
-    st.info(
-        "Add at least two cyclone observations to generate "
-        "the TCN landfall prediction."
+    tcn_track_df = pd.DataFrame(
+        st.session_state.tcn_track_history
     )
 
+    if len(tcn_track_df) >= 2:
 
-# ============================================================
-# 15. CLEAR OBSERVATION HISTORIES
-# ============================================================
+        try:
+            tcn_result = predict_tcn(tcn_track_df)
 
-st.divider()
-st.subheader("Reset Observations")
+            pred_col1, pred_col2 = st.columns(2)
 
-if st.button(
-    "Clear All Observations",
-    type="secondary",
-    use_container_width=True
-):
-    st.session_state.tcn_track_history = []
-    st.session_state.lstm_track_history = []
+            with pred_col1:
+                st.metric(
+                    "Predicted Landfall Latitude",
+                    f"{tcn_result['predicted_landfall_lat']:.4f}°"
+                )
 
-    st.session_state.tcn_first_observation_datetime = None
-    st.session_state.tcn_last_observation_datetime = None
+            with pred_col2:
+                st.metric(
+                    "Predicted Landfall Longitude",
+                    f"{tcn_result['predicted_landfall_lon']:.4f}°"
+                )
 
-    st.rerun()
+        except Exception as e:
+            st.error(f"TCN prediction error: {e}")
+
+    else:
+        st.info(
+            "Add at least two cyclone observations to generate "
+            "the TCN landfall prediction."
+        )
+
+
 
 # ============================================================
 # 16. DISCLAIMER
