@@ -749,13 +749,13 @@ with content_col:
             st.session_state.show_predictions = False
             st.warning(
                 f"Add at least {lstm_min_observations} observations before "
-                "generating the LSTM track prediction."
+                "generating track prediction."
             )
         elif len(st.session_state.tcn_track_history) < tcn_min_observations:
             st.session_state.show_predictions = False
             st.warning(
                 f"Add at least {tcn_min_observations} observations before "
-                "generating the TCN landfall prediction."
+                "generating landfall prediction."
             )
         else:
             st.session_state.show_predictions = True
