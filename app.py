@@ -562,13 +562,13 @@ st.markdown(
         <div style="
             font-size: 12px;
             color: #922B21;
-            font-weight: 600;
+            font-weight: 800;
             margin-bottom: 4px;
         ">CYCLONE CATEGORY</div>
         <div style="
             font-size: 16px;
             color: #C0392B;
-            font-weight: 700;
+            font-weight: 900;
         ">{grade_names[gradeno]}</div>
     </div>
     """,
