@@ -416,10 +416,12 @@ with content_col:
             border: 2px solid #4682B4;
             border-radius: 12px;
             padding: 16px 24px;
-            margin: 8px 0 20px 0;
+            margin: 6px auto 12px auto;
             background-color: rgba(70, 130, 180, 0.10);
             text-align: center;
             max-width: 700px;
+            width: 100%;
+            box-sizing: border-box;
         ">
             <div style="
                 font-size: 12px;
