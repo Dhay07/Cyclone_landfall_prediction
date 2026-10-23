@@ -279,7 +279,7 @@ def show_about():
 # 6. TITLE
 # ============================================================
 
-left_space, center_col, right_space = st.columns([1, 3, 1])
+left_space, center_col, right_space = st.columns([0.75, 3, 0.75])
 
 with center_col:
     st.title("🌀 Cyclone Landfall Prediction - Bay of Bengal")
