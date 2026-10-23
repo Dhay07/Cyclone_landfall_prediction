@@ -937,20 +937,18 @@ else:
 st.divider()
 st.subheader("Reset Observations")
 
-clear_col1, clear_col2 = st.columns(2)
+if st.button(
+    "Clear All Observations",
+    type="secondary",
+    use_container_width=True
+):
+    st.session_state.tcn_track_history = []
+    st.session_state.lstm_track_history = []
 
-with clear_col1:
-    if st.button("Clear TCN History", use_container_width=True):
-        st.session_state.tcn_track_history = []
-        st.session_state.tcn_first_observation_datetime = None
-        st.session_state.tcn_last_observation_datetime = None
-        st.rerun()
+    st.session_state.tcn_first_observation_datetime = None
+    st.session_state.tcn_last_observation_datetime = None
 
-with clear_col2:
-    if st.button("Clear LSTM History", use_container_width=True):
-        st.session_state.lstm_track_history = []
-        st.rerun()
-
+    st.rerun()
 
 # ============================================================
 # 16. DISCLAIMER
