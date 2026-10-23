@@ -6,6 +6,16 @@ import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import math
+# ============================================================
+# 1. PAGE CONFIGURATION
+# ============================================================
+
+st.set_page_config(
+    page_title="Cyclone Landfall Prediction-BoB",
+    page_icon="🌀",
+    layout="wide"
+)
+
 st.markdown(
     """
     <style>
@@ -46,17 +56,6 @@ except ImportError as exc:
 
 from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
-
-# ============================================================
-# 1. PAGE CONFIGURATION
-# ============================================================
-
-st.set_page_config(
-    page_title="Cyclone Landfall Prediction-BoB",
-    page_icon="🌀",
-    layout="wide"
-)
-
 
 # ============================================================
 # 2. LOAD CONFIGURATIONS
