@@ -1014,8 +1014,10 @@ with about_col:
 with contact_col:
     with st.expander("✉️ Contact"):
         st.markdown("""
-        For questions, feedback, or research collaboration,
-        please contact the researcher.
+         For questions, feedback, or research collaboration, please feel
+         free to get in touch. Your interest and valuable suggestions are
+         greatly appreciated, and I would be most grateful for opportunities
+         to exchange ideas and collaborate.
 
         - **Developer:** Dhayanand J
         - **Email:** dhayanand06@gmail.com
