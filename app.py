@@ -502,60 +502,66 @@ with content_col:
     # ============================================================
     # 12. DISPLAY SHARED OBSERVATION HISTORY
     # ============================================================
-
+        # ============================================================
+        # OBSERVATION HISTORY
+        # ============================================================
         st.divider()
         st.subheader("Observation History")
 
-    # Use one history for display to avoid duplicate observations.
-    # LSTM history contains all eight shared observation fields.
+        # Use LSTM history to avoid displaying duplicate observations.
         lstm_history = st.session_state.lstm_track_history
 
-        if lstm_history:
-           observation_df = pd.DataFrame(lstm_history)
+        if lstm_history is not None and len(lstm_history) > 0:
+            observation_df = pd.DataFrame(lstm_history).copy()
 
-        # Convert the stored model time (e.g. 600.0) to HH:MM.
-           def format_observation_time(value):
-               if pd.isna(value):
-                   return None
+            # Convert stored model time (e.g., 600.0) to HH:MM.
+            def format_observation_time(value):
+                if pd.isna(value):
+                    return None
 
-               value = int(value)
-               if value == 2400:
-                   return "00:00"
-               hours = value // 100
-               minutes = value % 100
-               return f"{hours:02d}:{minutes:02d}"
+                value = int(value)
 
-           if "hrs_corrected" in observation_df.columns:
-               observation_df["Time"] = (
-                   observation_df["hrs_corrected"]
-                   .apply(format_observation_time)
-               )
+                if value == 2400:
+                    return "00:00"
 
-           display_columns = [
-            "Day", "Month", "Year", "Time",
-            "Lat", "Lon", "WS", "CP"
-        ]
+                hours = value // 100
+                minutes = value % 100
+                return f"{hours:02d}:{minutes:02d}"
 
-        # Ensure the table always has the requested columns.
-           for col in display_columns:
-               if col not in observation_df.columns:
-                   observation_df[col] = None
+            if "hrs_corrected" in observation_df.columns:
+                observation_df["Time"] = (
+                    observation_df["hrs_corrected"]
+                    .apply(format_observation_time)
+                )
 
-           observation_df = observation_df[display_columns]
+            display_columns = [
+                "Day", "Month", "Year", "Time",
+                "Lat", "Lon", "WS", "CP"
+            ]
 
-           observation_df = observation_df.sort_values(
-               by=["Year", "Month", "Day", "Time"],
-               kind="stable"
-           ).reset_index(drop=True)
- 
-           # Read-only table; do not use st.data_editor here.
-           st.dataframe(
-               observation_df,
-               use_container_width=True,
-               hide_index=True
-           )
+            # Ensure all requested columns exist.
+            for col in display_columns:
+                if col not in observation_df.columns:
+                    observation_df[col] = None
+
+            observation_df = observation_df[display_columns]
+
+            # Sort observations chronologically.
+            observation_df = observation_df.sort_values(
+                by=["Year", "Month", "Day", "Time"],
+                kind="stable",
+                na_position="last"
+            ).reset_index(drop=True)
+
+            # Display a read-only history table.
+            st.dataframe(
+                observation_df,
+                use_container_width=True,
+                hide_index=True
+            )
+
         else:
-              st.info("No observations have been added yet.")
+            st.info("No observations have been added yet.")
 
     # ============================================================
     # RIGHT COLUMN: SEASON AND STORM CATEGORY BILLBOARDS
