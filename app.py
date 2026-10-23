@@ -961,12 +961,12 @@ if st.session_state.show_predictions:
                 lat_col, lon_col = st.columns(2)
                 with lat_col:
                    st.metric(
-                    "Predicted Latitude",
-                    f"{lstm_result['predicted_lat']:.4f}DD"
+                    "Predicted Latitude (DD)",
+                    f"{lstm_result['predicted_lat']:.4f}"
                 )
                 with lon_col:
                    st.metric(
-                    "Predicted Longitude",
+                    "Predicted Longitude (DD)",
                     f"{lstm_result['predicted_lon']:.4f}DD"
                 )
 
@@ -998,15 +998,16 @@ if st.session_state.show_predictions:
 
             try:
                 tcn_result = predict_tcn(tcn_track_df)
-
-                st.metric(
-                    "Landfall Latitude",
-                    f"{tcn_result['predicted_landfall_lat']:.4f}°"
+                lat_col, lon_col = st.columns(2)
+                with lat_col:   
+                 st.metric(
+                    "Landfall Latitude (DD)",
+                    f"{tcn_result['predicted_landfall_lat']:.4f}"
                 )
-
-                st.metric(
-                    "Landfall Longitude",
-                    f"{tcn_result['predicted_landfall_lon']:.4f}°"
+                with lon_col:
+                 st.metric(
+                    "Landfall Longitude (DD)",
+                    f"{tcn_result['predicted_landfall_lon']:.4f}"
                 )
 
             except Exception as e:
