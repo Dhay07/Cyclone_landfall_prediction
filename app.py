@@ -18,45 +18,49 @@ st.set_page_config(
 )
 
 
+
 st.markdown(
     """
     <style>
-        /* Hide Streamlit toolbar */
-        [data-testid="stToolbar"] {
-            visibility: hidden;
-            height: 0;
-            position: fixed;
-        }
-
-        /* Hide top decoration */
-        [data-testid="stDecoration"] {
-            display: none;
-        }
-
-        /* Hide main menu and footer */
-        #MainMenu {
-            visibility: hidden;
-        }
-
+        /* Hide Streamlit interface elements */
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        #MainMenu,
         footer {
-            visibility: hidden;
+            display: none !important;
         }
 
-        /* Reduce space above the main content */
+        /* Remove top and bottom content spacing */
+        [data-testid="stAppViewBlockContainer"] {
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+        }
+
+        [data-testid="stMainBlockContainer"],
         [data-testid="stAppViewContainer"] .main .block-container {
-            padding-top: 0.5rem !important;
-            padding-bottom: 1rem !important;
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+            margin-top: 0rem !important;
+            margin-bottom: 0rem !important;
         }
 
-        /* Reduce top margin of the main title */
+        /* Reduce header height */
+        [data-testid="stHeader"] {
+            height: 0rem !important;
+            min-height: 0rem !important;
+            display: none !important;
+        }
+
+        /* Remove default title spacing */
         h1 {
-            margin-top: 0 !important;
-            padding-top: 0 !important;
+            margin-top: 0rem !important;
+            padding-top: 0rem !important;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # Optional geospatial dependencies are required for automatic coastline features.
 try:
