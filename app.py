@@ -60,21 +60,15 @@ from google_sheets_api import send_to_google_sheets
 
 import extra_streamlit_components as stx
 
-cookie_manager = stx.CookieManager(key="cyclone_cookie_manager")
+from visitor_identity import get_visitor_identity
 
-st.subheader("Visitor cookie diagnostic")
+# Initialize the browser cookie manager.
+cookie_manager = stx.CookieManager(
+    key="cyclone_cookie_manager"
+)
 
-cookie_value = cookie_manager.get("cyclone_visitor_token")
-
-if cookie_value:
-    st.success("Visitor cookie found in browser.")
-    st.write("Cookie length:", len(cookie_value))
-else:
-    st.warning("Visitor cookie not available yet.")
-
-if st.button("Check cookie again"):
-    st.rerun()
-
+# Obtain the verified, browser-specific visitor identity.
+visitor_id = get_visitor_identity(cookie_manager)
 # ============================================================
 # 2. LOAD CONFIGURATIONS
 # ============================================================
