@@ -1162,269 +1162,267 @@ with content_col:
 # ============================================================
 # INTERACTIVE CYCLONE TRACK AND LANDFALL MAP
 # ============================================================
+map_col, info_col = st.columns([0.9, 1.1], gap="large")
 
-if (
-    st.session_state.get("show_predictions", False)
-    and st.session_state.tcn_track_history
-):
-    st.markdown("### 🗺️ Cyclone Track and Predicted Landfall")
+with map_col:
+    if (
+        st.session_state.get("show_predictions", False)
+        and st.session_state.tcn_track_history
+    ):
+        st.markdown("### 🗺️ Cyclone Track and Predicted Landfall")
 
-    # Observed cyclone positions
-    observed_track = [
-        (float(obs["Lat"]), float(obs["Lon"]))
-        for obs in st.session_state.tcn_track_history
-    ]
+        # Observed cyclone positions
+        observed_track = [
+            (float(obs["Lat"]), float(obs["Lon"]))
+            for obs in st.session_state.tcn_track_history
+        ]
 
-    current_lat, current_lon = observed_track[-1]
+        current_lat, current_lon = observed_track[-1]
 
-    # Predicted landfall coordinates
-    lstm_lat = st.session_state.get("lstm_predicted_lat")
-    lstm_lon = st.session_state.get("lstm_predicted_lon")
-    tcn_lat = st.session_state.get("tcn_predicted_lat")
-    tcn_lon = st.session_state.get("tcn_predicted_lon")
+        # Predicted landfall coordinates
+        lstm_lat = st.session_state.get("lstm_predicted_lat")
+        lstm_lon = st.session_state.get("lstm_predicted_lon")
+        tcn_lat = st.session_state.get("tcn_predicted_lat")
+        tcn_lon = st.session_state.get("tcn_predicted_lon")
 
- 
-    # --------------------------------------------------------
-    # 1. CREATE MAP FOCUSED ON THE BAY OF BENGAL
-    # --------------------------------------------------------
+    
+        # --------------------------------------------------------
+        # 1. CREATE MAP FOCUSED ON THE BAY OF BENGAL
+        # --------------------------------------------------------
 
-    cyclone_map = folium.Map(
-        location=[15.0, 88.0],
-        zoom_start=5,
-        tiles="OpenStreetMap",
-        control_scale=True
-    )
-
-    # Keep the regional view focused on the Bay of Bengal,
-    # Indian east coast, Bangladesh and Myanmar.
-    cyclone_map.fit_bounds(
-        [[3.0, 78.0], [23.5, 95.0]],
-        padding=(20, 20)
-    )
-
-    # --------------------------------------------------------
-    # 2. OBSERVED CYCLONE TRACK
-    # --------------------------------------------------------
-
-    if len(observed_track) > 1:
-        folium.PolyLine(
-            observed_track,
-            color="#1976D2",
-            weight=4,
-            opacity=0.9,
-            tooltip="Observed cyclone track"
-        ).add_to(cyclone_map)
-
-    # --------------------------------------------------------
-    # 3. CURRENT CYCLONE POSITION
-    # --------------------------------------------------------
-
-    current_popup = folium.Popup(
-        f"""
-        <div style="font-family:Arial; min-width:180px;">
-            <b style="color:#1976D2;">🌀 Current Cyclone Position</b>
-            <hr style="margin:6px 0;">
-            Latitude: {current_lat:.4f}<br>
-            Longitude: {current_lon:.4f}
-        </div>
-        """,
-        max_width=280
-    )
-
-    folium.Marker(
-        [current_lat, current_lon],
-        popup=current_popup,
-        icon=folium.DivIcon(
-            html="""
-            <div style="
-                font-size:27px;
-                width:34px;
-                height:34px;
-                line-height:34px;
-                text-align:center;
-                text-shadow:1px 1px 3px white;
-            ">🌀</div>
-            """,
-            icon_size=(34, 34),
-            icon_anchor=(17, 17)
+        cyclone_map = folium.Map(
+            location=[15.0, 88.0],
+            zoom_start=5,
+            tiles="OpenStreetMap",
+            control_scale=True
         )
-    ).add_to(cyclone_map)
 
-    map_points = list(observed_track)
+        # Keep the regional view focused on the Bay of Bengal,
+        # Indian east coast, Bangladesh and Myanmar.
+        cyclone_map.fit_bounds(
+            [[3.0, 78.0], [23.5, 95.0]],
+            padding=(20, 20)
+        )
 
-    # --------------------------------------------------------
-    # 4. LSTM PREDICTED POSITION — 12 HOURS AHEAD
-    # --------------------------------------------------------
+        # --------------------------------------------------------
+        # 2. OBSERVED CYCLONE TRACK
+        # --------------------------------------------------------
 
-    lstm_lat = st.session_state.get("lstm_predicted_lat")
-    lstm_lon = st.session_state.get("lstm_predicted_lon")
+        if len(observed_track) > 1:
+            folium.PolyLine(
+                observed_track,
+                color="#1976D2",
+                weight=4,
+                opacity=0.9,
+                tooltip="Observed cyclone track"
+            ).add_to(cyclone_map)
 
-    if lstm_lat is not None and lstm_lon is not None:
-        lstm_lat = float(lstm_lat)
-        lstm_lon = float(lstm_lon)
+        # --------------------------------------------------------
+        # 3. CURRENT CYCLONE POSITION
+        # --------------------------------------------------------
 
-        lstm_point = [lstm_lat, lstm_lon]
-
-        # Dashed connection, not a model-generated trajectory
-        folium.PolyLine(
-            [[current_lat, current_lon], lstm_point],
-            color="#159447",
-            weight=3,
-            opacity=0.9,
-            dash_array="8, 8",
-            tooltip="Current position to LSTM predicted position"
-        ).add_to(cyclone_map)
+        current_popup = folium.Popup(
+            f"""
+            <div style="font-family:Arial; min-width:180px;">
+                <b style="color:#1976D2;">🌀 Current Cyclone Position</b>
+                <hr style="margin:6px 0;">
+                Latitude: {current_lat:.4f}<br>
+                Longitude: {current_lon:.4f}
+            </div>
+            """,
+            max_width=280
+        )
 
         folium.Marker(
-            lstm_point,
-            popup=folium.Popup(
-                f"""
-                <div style="font-family:Arial; min-width:180px;">
-                    <b style="color:#159447;">
-                        LSTM Predicted Position
-                    </b>
-                    <br><small>12 hours ahead</small>
-                    <hr style="margin:6px 0;">
-                    Latitude: {lstm_lat:.4f}<br>
-                    Longitude: {lstm_lon:.4f}
-                </div>
-                """,
-                max_width=280
-            ),
+            [current_lat, current_lon],
+            popup=current_popup,
             icon=folium.DivIcon(
                 html="""
                 <div style="
-                    background-color: #FFD700;
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    border: 2px solid white;
-                    box-shadow: 0 0 3px #555;
-                "></div>
+                    font-size:27px;
+                    width:34px;
+                    height:34px;
+                    line-height:34px;
+                    text-align:center;
+                    text-shadow:1px 1px 3px white;
+                ">🌀</div>
                 """,
-                icon_size=(16, 16),
-                icon_anchor=(8, 8)
+                icon_size=(34, 34),
+                icon_anchor=(17, 17)
             )
         ).add_to(cyclone_map)
 
-        map_points.append(tuple(lstm_point))
+        map_points = list(observed_track)
 
-    # --------------------------------------------------------
-    # 5. TCN PREDICTED LANDFALL
-    # --------------------------------------------------------
+        # --------------------------------------------------------
+        # 4. LSTM PREDICTED POSITION — 12 HOURS AHEAD
+        # --------------------------------------------------------
 
-    tcn_lat = st.session_state.get("tcn_predicted_lat")
-    tcn_lon = st.session_state.get("tcn_predicted_lon")
+        lstm_lat = st.session_state.get("lstm_predicted_lat")
+        lstm_lon = st.session_state.get("lstm_predicted_lon")
 
-    if tcn_lat is not None and tcn_lon is not None:
-        tcn_lat = float(tcn_lat)
-        tcn_lon = float(tcn_lon)
+        if lstm_lat is not None and lstm_lon is not None:
+            lstm_lat = float(lstm_lat)
+            lstm_lon = float(lstm_lon)
 
-        tcn_point = [tcn_lat, tcn_lon]
+            lstm_point = [lstm_lat, lstm_lon]
 
-        # Dashed connection, not a model-generated trajectory
-        folium.PolyLine(
-            [[current_lat, current_lon], tcn_point],
-            color="#D62828",
-            weight=3,
-            opacity=0.9,
-            dash_array="8, 8",
-            tooltip="Current position to TCN predicted landfall"
-        ).add_to(cyclone_map)
+            # Dashed connection, not a model-generated trajectory
+            folium.PolyLine(
+                [[current_lat, current_lon], lstm_point],
+                color="#159447",
+                weight=3,
+                opacity=0.9,
+                dash_array="8, 8",
+                tooltip="Current position to LSTM predicted position"
+            ).add_to(cyclone_map)
 
-        folium.Marker(
-            tcn_point,
-            popup=folium.Popup(
-                f"""
-                <div style="font-family:Arial; min-width:180px;">
-                    <b style="color:#D62828;">
-                        TCN Predicted Landfall
-                    </b>
-                    <hr style="margin:6px 0;">
-                    Latitude: {tcn_lat:.4f}<br>
-                    Longitude: {tcn_lon:.4f}
-                </div>
-                """,
-                max_width=280
-            ),
-             icon=folium.DivIcon(
-                html="""
-                <div style="
-                    background-color: #D62828;
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    border: 2px solid white;
-                    box-shadow: 0 0 3px #555;
-                "></div>
-                """,
-                icon_size=(16, 16),
-                icon_anchor=(8, 8)
-)
-        ).add_to(cyclone_map)
+            folium.Marker(
+                lstm_point,
+                popup=folium.Popup(
+                    f"""
+                    <div style="font-family:Arial; min-width:180px;">
+                        <b style="color:#159447;">
+                            LSTM Predicted Position
+                        </b>
+                        <br><small>12 hours ahead</small>
+                        <hr style="margin:6px 0;">
+                        Latitude: {lstm_lat:.4f}<br>
+                        Longitude: {lstm_lon:.4f}
+                    </div>
+                    """,
+                    max_width=280
+                ),
+                icon=folium.DivIcon(
+                    html="""
+                    <div style="
+                        background-color: #FFD700;
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        border: 2px solid white;
+                        box-shadow: 0 0 3px #555;
+                    "></div>
+                    """,
+                    icon_size=(16, 16),
+                    icon_anchor=(8, 8)
+                )
+            ).add_to(cyclone_map)
 
-        map_points.append(tuple(tcn_point))
+            map_points.append(tuple(lstm_point))
 
-    # --------------------------------------------------------
-    # 6. LEGEND
-    # --------------------------------------------------------
+        # --------------------------------------------------------
+        # 5. TCN PREDICTED LANDFALL
+        # --------------------------------------------------------
 
-    legend_html = """
-    <div style="
-        position: fixed;
-        bottom: 25px;
-        left: 25px;
-        z-index: 9999;
-        background: black;
-        padding: 10px 13px;
-        border: 1px solid #bbb;
-        border-radius: 7px;
-        box-shadow: 0 1px 5px rgba(0,0,0,0.25);
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        line-height: 1.8;
-    ">
-        <b style="font-size:13px;">Map Legend</b><br>
-        <span style="color:#1976D2;">━━━━</span>
-        Observed track<br>
-        🌀 Current position<br>
-        <span style="color:#FFD700; font-size:20px;">●</span>
-        LSTM predicted position (12 h)<br>
-        <span style="color:#D62828; font-size:20px;">●</span>
-        TCN predicted landfall<br>
-        <span style="color:#555;">┄ ┄ ┄</span>
-        Connection to predicted endpoint
-    </div>
-    """
+        tcn_lat = st.session_state.get("tcn_predicted_lat")
+        tcn_lon = st.session_state.get("tcn_predicted_lon")
 
-    cyclone_map.get_root().html.add_child(
-        folium.Element(legend_html)
+        if tcn_lat is not None and tcn_lon is not None:
+            tcn_lat = float(tcn_lat)
+            tcn_lon = float(tcn_lon)
+
+            tcn_point = [tcn_lat, tcn_lon]
+
+            # Dashed connection, not a model-generated trajectory
+            folium.PolyLine(
+                [[current_lat, current_lon], tcn_point],
+                color="#D62828",
+                weight=3,
+                opacity=0.9,
+                dash_array="8, 8",
+                tooltip="Current position to TCN predicted landfall"
+            ).add_to(cyclone_map)
+
+            folium.Marker(
+                tcn_point,
+                popup=folium.Popup(
+                    f"""
+                    <div style="font-family:Arial; min-width:180px;">
+                        <b style="color:#D62828;">
+                            TCN Predicted Landfall
+                        </b>
+                        <hr style="margin:6px 0;">
+                        Latitude: {tcn_lat:.4f}<br>
+                        Longitude: {tcn_lon:.4f}
+                    </div>
+                    """,
+                    max_width=280
+                ),
+                icon=folium.DivIcon(
+                    html="""
+                    <div style="
+                        background-color: #D62828;
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        border: 2px solid white;
+                        box-shadow: 0 0 3px #555;
+                    "></div>
+                    """,
+                    icon_size=(16, 16),
+                    icon_anchor=(8, 8)
     )
+            ).add_to(cyclone_map)
 
-    # --------------------------------------------------------
-    # 7. DISPLAY MAP
-    # --------------------------------------------------------
+            map_points.append(tuple(tcn_point))
 
-    st_folium(
-        cyclone_map,
-        height=600,
-        use_container_width=True,
-        returned_objects=[]
-    )
-prediction_panel = st.container()
+        # --------------------------------------------------------
+        # 6. LEGEND
+        # --------------------------------------------------------
+
+        legend_html = """
+        <div style="
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            z-index: 9999;
+            background: black;
+            padding: 10px 13px;
+            border: 1px solid #bbb;
+            border-radius: 7px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.8;
+        ">
+            <b style="font-size:13px;">Map Legend</b><br>
+            <span style="color:#1976D2;">━━━━</span>
+            Observed track<br>
+            🌀 Current position<br>
+            <span style="color:#FFD700; font-size:20px;">●</span>
+            LSTM predicted position (12 h)<br>
+            <span style="color:#D62828; font-size:20px;">●</span>
+            TCN predicted landfall<br>
+            <span style="color:#555;">┄ ┄ ┄</span>
+            Connection to predicted endpoint
+        </div>
+        """
+
+        cyclone_map.get_root().html.add_child(
+            folium.Element(legend_html)
+        )
+
+        # --------------------------------------------------------
+        # 7. DISPLAY MAP
+        # --------------------------------------------------------
+
+        st_folium(
+            cyclone_map,
+            height=480,
+            use_container_width=True,
+            returned_objects=[]
+        )
+
 # ============================================================
 # MODEL PREDICTIONS — DISPLAY BELOW THE RIGHT-SIDE BILLBOARDS
 # ============================================================
 
-with prediction_panel:
-
-    left_col, right_col = st.columns([1, 1], gap="large")
+with info_col:
 
     # ========================================================
     # LEFT COLUMN: OBSERVATION HISTORY
     # ========================================================
-
-    with left_col:
 
         st.subheader("Observation History")
 
@@ -1478,8 +1476,6 @@ with prediction_panel:
     # ========================================================
     # RIGHT COLUMN: PREDICTED TRACK AND LANDFALL
     # ========================================================
-
-    with right_col:
 
         st.subheader("Predicted Track 12 h Ahead")
 
