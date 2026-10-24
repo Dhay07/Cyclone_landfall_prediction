@@ -131,37 +131,16 @@ def get_season(month):
 # 4. INPUT INFORMATION POPOVER
 # ============================================================
 
+
 def add_input(label, key, explanation, **kwargs):
-    """Display a numeric input with a compact information popover."""
+    return st.number_input(
+        label,
+        key=key,
+        help=explanation,
+        **kwargs
+    )
 
-    input_col, info_col = st.columns([3, 0.25], gap="small")
 
-    with input_col:
-        value = st.number_input(
-            label,
-            key=key,
-            **kwargs
-        )
-
-    with info_col:
-        st.markdown("""
-            <style>
-            div[data-testid="stPopover"] > button {
-                padding: 0 !important;
-                min-height: 24px !important;
-                height: 24px !important;
-                min-width: 24px !important;
-                width: 24px !important;
-                font-size: 12px !important;
-                line-height: 1 !important;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-
-        with st.popover("ⓘ"):
-            st.write(explanation)
-
-    return value
 
 # ============================================================
 # AUTOMATED TCN FEATURE HELPERS
