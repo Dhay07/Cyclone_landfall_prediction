@@ -58,21 +58,22 @@ from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
 from google_sheets_api import send_to_google_sheets
 
-
 import extra_streamlit_components as stx
-from visitor_identity import get_visitor_identity
 
 cookie_manager = stx.CookieManager(key="cyclone_cookie_manager")
 
-visitor_id = get_visitor_identity(cookie_manager)
+st.subheader("Visitor cookie diagnostic")
 
-with st.expander("Anonymous visitor identity test"):
-    st.write("Your visitor ID:")
-    st.code(visitor_id[:12] + "...")
-    st.caption(
-        "Refresh the page and check whether this ID remains the same."
-    )
+cookie_value = cookie_manager.get("cyclone_visitor_token")
 
+if cookie_value:
+    st.success("Visitor cookie found in browser.")
+    st.write("Cookie length:", len(cookie_value))
+else:
+    st.warning("Visitor cookie not available yet.")
+
+if st.button("Check cookie again"):
+    st.rerun()
 
 # ============================================================
 # 2. LOAD CONFIGURATIONS
