@@ -1162,7 +1162,7 @@ with content_col:
 # ============================================================
 # INTERACTIVE CYCLONE TRACK AND LANDFALL MAP
 # ============================================================
-map_col, info_col = st.columns([0.9, 1.1], gap="large")
+map_col, info_col = st.columns([1.2, 1], gap="medium")
 
 with map_col:
     if (
