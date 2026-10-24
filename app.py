@@ -66,8 +66,12 @@ cookie_manager = stx.CookieManager(key="cyclone_cookie_manager")
 
 visitor_id = get_visitor_identity(cookie_manager)
 
-st.sidebar.caption("Anonymous visitor identity test")
-st.sidebar.code(visitor_id[:12] + "...")
+with st.expander("Anonymous visitor identity test"):
+    st.write("Your visitor ID:")
+    st.code(visitor_id[:12] + "...")
+    st.caption(
+        "Refresh the page and check whether this ID remains the same."
+    )
 
 
 # ============================================================
