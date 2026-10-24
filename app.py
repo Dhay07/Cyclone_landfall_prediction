@@ -322,15 +322,35 @@ def show_about():
 # 6. TITLE
 # ============================================================
 
+
 st.markdown(
     """
-    <h1 style="text-align: center;">
-        🌀 Cyclone Landfall Prediction - Bay of Bengal
-    </h1>
-    <p style="text-align: center; font-size: 16px;">
-        Research-based tropical cyclone prediction using
-        deep-learning models.
-    </p>
+    <div style="
+        background: linear-gradient(135deg, #102A43, #155E91);
+        padding: 22px 15px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 20px;
+        border-bottom: 4px solid #38BDF8;
+    ">
+        <h1 style="
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            font-size: 32px;
+        ">
+            🌀 Cyclone Landfall Prediction - Bay of Bengal
+        </h1>
+        <p style="
+            color: #DCEEF8;
+            font-size: 16px;
+            margin: 8px 0 0 0;
+        ">
+            Research-based tropical cyclone prediction using
+            deep-learning models.
+        </p>
+    </div>
     """,
     unsafe_allow_html=True
 )
