@@ -6,3 +6,5 @@ torch==2.14.0
 tensorflow==2.21.0
 geopandas==1.0.1
 extra-streamlit-components
+folium
+streamlit-folium

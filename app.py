@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import math
 import uuid
+import folium
+from streamlit_folium import st_folium
 # ============================================================
 # 1. PAGE CONFIGURATION
 # ============================================================
@@ -1294,6 +1296,141 @@ with prediction_panel:
                 else "—"
             )
         )
+    
+# ============================================================
+# INTERACTIVE CYCLONE TRACK AND LANDFALL MAP
+# ============================================================
+
+if (
+    st.session_state.get("show_predictions", False)
+    and st.session_state.tcn_track_history
+):
+    st.markdown("### 🗺️ Cyclone Track and Predicted Landfall")
+
+    # Observed cyclone positions
+    observed_track = [
+        (float(obs["Lat"]), float(obs["Lon"]))
+        for obs in st.session_state.tcn_track_history
+    ]
+
+    current_lat, current_lon = observed_track[-1]
+
+    # Predicted landfall coordinates
+    lstm_lat = st.session_state.get("lstm_predicted_lat")
+    lstm_lon = st.session_state.get("lstm_predicted_lon")
+    tcn_lat = st.session_state.get("tcn_predicted_lat")
+    tcn_lon = st.session_state.get("tcn_predicted_lon")
+
+    # Create map centred on the latest cyclone position
+    cyclone_map = folium.Map(
+        location=[current_lat, current_lon],
+        zoom_start=5,
+        tiles="CartoDB positron"
+    )
+
+    # Observed cyclone track
+    if len(observed_track) > 1:
+        folium.PolyLine(
+            observed_track,
+            color="blue",
+            weight=3,
+            opacity=0.85,
+            tooltip="Observed cyclone track"
+        ).add_to(cyclone_map)
+
+    # Latest observed position
+    folium.Marker(
+        [current_lat, current_lon],
+        tooltip="Current cyclone position",
+        popup=(
+            f"Current Position<br>"
+            f"Latitude: {current_lat:.4f}<br>"
+            f"Longitude: {current_lon:.4f}"
+        ),
+        icon=folium.Icon(
+            color="blue",
+            icon="info-sign"
+        )
+    ).add_to(cyclone_map)
+
+    map_points = list(observed_track)
+
+    # LSTM predicted landfall
+    if lstm_lat is not None and lstm_lon is not None:
+        lstm_lat = float(lstm_lat)
+        lstm_lon = float(lstm_lon)
+
+        folium.PolyLine(
+            [[current_lat, current_lon], [lstm_lat, lstm_lon]],
+            color="green",
+            weight=2,
+            dash_array="8, 8",
+            tooltip="Current position to LSTM landfall"
+        ).add_to(cyclone_map)
+
+        folium.Marker(
+            [lstm_lat, lstm_lon],
+            tooltip="LSTM predicted landfall",
+            popup=(
+                f"LSTM Predicted Landfall<br>"
+                f"Latitude: {lstm_lat:.4f}<br>"
+                f"Longitude: {lstm_lon:.4f}"
+            ),
+            icon=folium.Icon(
+                color="green",
+                icon="flag"
+            )
+        ).add_to(cyclone_map)
+
+        map_points.append((lstm_lat, lstm_lon))
+
+    # TCN predicted landfall
+    if tcn_lat is not None and tcn_lon is not None:
+        tcn_lat = float(tcn_lat)
+        tcn_lon = float(tcn_lon)
+
+        folium.PolyLine(
+            [[current_lat, current_lon], [tcn_lat, tcn_lon]],
+            color="red",
+            weight=2,
+            dash_array="8, 8",
+            tooltip="Current position to TCN landfall"
+        ).add_to(cyclone_map)
+
+        folium.Marker(
+            [tcn_lat, tcn_lon],
+            tooltip="TCN predicted landfall",
+            popup=(
+                f"TCN Predicted Landfall<br>"
+                f"Latitude: {tcn_lat:.4f}<br>"
+                f"Longitude: {tcn_lon:.4f}"
+            ),
+            icon=folium.Icon(
+                color="red",
+                icon="flag"
+            )
+        ).add_to(cyclone_map)
+
+        map_points.append((tcn_lat, tcn_lon))
+
+    # Automatically zoom to include the observed track
+    # and both predicted landfall locations
+    if len(map_points) > 1:
+        cyclone_map.fit_bounds(map_points, padding=(30, 30))
+
+    st_folium(
+        cyclone_map,
+        height=550,
+        use_container_width=True,
+        returned_objects=[]
+    )
+
+    st.caption(
+        "Blue: observed track and current position | "
+        "Green: LSTM landfall | Red: TCN landfall. "
+        "Dashed lines connect the current position to the "
+        "predicted endpoints; they are not forecast trajectories."
+    )
 
 # ============================================================
 # 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
