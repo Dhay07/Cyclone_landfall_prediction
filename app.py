@@ -1432,21 +1432,16 @@ if (
             icon=folium.DivIcon(
                 html="""
                 <div style="
-                    background:#159447;
-                    color:white;
-                    border:2px solid white;
-                    border-radius:50%;
-                    width:25px;
-                    height:25px;
-                    line-height:21px;
-                    text-align:center;
-                    font-weight:bold;
-                    font-size:12px;
-                    box-shadow:0 1px 4px #777;
-                ">T</div>
+                    background-color: #FFD700;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 0 3px #555;
+                "></div>
                 """,
-                icon_size=(25, 25),
-                icon_anchor=(12, 12)
+                icon_size=(16, 16),
+                icon_anchor=(8, 8)
             )
         ).add_to(cyclone_map)
 
@@ -1484,31 +1479,26 @@ if (
                         TCN Predicted Landfall
                     </b>
                     <hr style="margin:6px 0;">
-                    Latitude: {tcn_lat:.4f}°<br>
-                    Longitude: {tcn_lon:.4f}°
+                    Latitude: {tcn_lat:.4f}<br>
+                    Longitude: {tcn_lon:.4f}
                 </div>
                 """,
                 max_width=280
             ),
-            icon=folium.DivIcon(
+             icon=folium.DivIcon(
                 html="""
                 <div style="
-                    background:#D62828;
-                    color:white;
-                    border:2px solid white;
-                    border-radius:4px;
-                    width:25px;
-                    height:25px;
-                    line-height:21px;
-                    text-align:center;
-                    font-weight:bold;
-                    font-size:12px;
-                    box-shadow:0 1px 4px #777;
-                ">L</div>
+                    background-color: #D62828;
+                    width: 16px;
+                    height: 16px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 0 3px #555;
+                "></div>
                 """,
-                icon_size=(25, 25),
-                icon_anchor=(12, 12)
-            )
+                icon_size=(16, 16),
+                icon_anchor=(8, 8)
+)
         ).add_to(cyclone_map)
 
         map_points.append(tuple(tcn_point))
@@ -1536,9 +1526,9 @@ if (
         <span style="color:#1976D2;">━━━━</span>
         Observed track<br>
         🌀 Current position<br>
-        <span style="color:#159447;"><b> L </b></span>
+        <span style="color:#FFD700; font-size:20px;">●</span>
         LSTM predicted position (12 h)<br>
-        <span style="color:#D62828;"><b> T </b></span>
+        <span style="color:#D62828; font-size:20px;">●</span>
         TCN predicted landfall<br>
         <span style="color:#555;">┄ ┄ ┄</span>
         Connection to predicted endpoint
