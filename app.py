@@ -6,6 +6,7 @@ import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import math
+import uuid
 # ============================================================
 # 1. PAGE CONFIGURATION
 # ============================================================
@@ -350,6 +351,91 @@ if "tcn_first_observation_datetime" not in st.session_state:
     st.session_state.tcn_first_observation_datetime = None
 if "tcn_last_observation_datetime" not in st.session_state:
     st.session_state.tcn_last_observation_datetime = None
+
+
+# ============================================================
+# RESTORE OBSERVATIONS FROM GOOGLE SHEETS
+# ============================================================
+
+if "track_id" not in st.session_state:
+    st.session_state.track_id = uuid.uuid4().hex
+
+if "_observations_loaded_for_visitor" not in st.session_state:
+    try:
+        result = send_to_google_sheets(
+            "list_observations",
+            {"visitor_id": visitor_id}
+        )
+
+        headers = result.get("headers", [])
+        rows = result.get("rows", [])
+
+        saved_records = [
+            dict(zip(headers, row))
+            for row in rows
+        ]
+
+        # Keep records in chronological order.
+        saved_records.sort(
+            key=lambda record: str(record.get("timestamp_utc", ""))
+        )
+
+        # Resume the most recently active track.
+        if saved_records:
+            latest_track_id = saved_records[-1].get("track_id")
+
+            active_records = [
+                record for record in saved_records
+                if record.get("track_id") == latest_track_id
+            ]
+
+            restored_tcn = []
+            restored_lstm = []
+            restored_datetimes = []
+
+            for record in active_records:
+                derived_text = record.get("derived_features_json", "{}")
+
+                if isinstance(derived_text, str):
+                    derived = json.loads(derived_text or "{}")
+                else:
+                    derived = derived_text or {}
+
+                tcn_observation = derived.get("tcn_observation")
+                lstm_observation = derived.get("lstm_observation")
+
+                if tcn_observation and lstm_observation:
+                    restored_tcn.append(tcn_observation)
+                    restored_lstm.append(lstm_observation)
+
+                    timestamp_text = str(record["timestamp_utc"])
+                    timestamp = datetime.fromisoformat(
+                        timestamp_text.replace("Z", "+00:00")
+                    ).replace(tzinfo=None)
+
+                    restored_datetimes.append(timestamp)
+
+            st.session_state.tcn_track_history = restored_tcn
+            st.session_state.lstm_track_history = restored_lstm
+
+            if restored_datetimes:
+                st.session_state.tcn_first_observation_datetime = (
+                    restored_datetimes[0]
+                )
+                st.session_state.tcn_last_observation_datetime = (
+                    restored_datetimes[-1]
+                )
+                st.session_state.track_id = latest_track_id
+
+        st.session_state["_observations_loaded_for_visitor"] = visitor_id
+
+    except Exception as exc:
+        st.error(
+            "Could not restore saved observations from Google Sheets. "
+            "Please refresh and try again."
+        )
+        st.exception(exc)
+        st.stop()
 
 left_space, content_col, right_space = st.columns([0.05, 0.90, 0.05])
 
