@@ -20,10 +20,10 @@ st.markdown("""
 <style>
 div[data-testid="stPopover"] > button {
     padding: 0px !important;
-    min-height: 22px !important;
-    min-width: 22px !important;
-    width: 22px !important;
-    height: 22px !important;
+    min-height: 10px !important;
+    min-width: 10px !important;
+    width: 10px !important;
+    height: 10px !important;
     font-size: 12px !important;
 }
 </style>
