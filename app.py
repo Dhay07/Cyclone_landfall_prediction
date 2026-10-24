@@ -17,19 +17,23 @@ st.set_page_config(
     layout="wide"
 )
 
+
 st.markdown(
     """
     <style>
+        /* Hide Streamlit toolbar */
         [data-testid="stToolbar"] {
             visibility: hidden;
-            height: 0%;
+            height: 0;
             position: fixed;
         }
 
+        /* Hide top decoration */
         [data-testid="stDecoration"] {
             display: none;
         }
 
+        /* Hide main menu and footer */
         #MainMenu {
             visibility: hidden;
         }
@@ -37,10 +41,23 @@ st.markdown(
         footer {
             visibility: hidden;
         }
+
+        /* Reduce space above the main content */
+        [data-testid="stAppViewContainer"] .main .block-container {
+            padding-top: 0.5rem !important;
+            padding-bottom: 1rem !important;
+        }
+
+        /* Reduce top margin of the main title */
+        h1 {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 # Optional geospatial dependencies are required for automatic coastline features.
 try:
     import geopandas as gpd
