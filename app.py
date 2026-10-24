@@ -1336,7 +1336,7 @@ if (
     # Keep the regional view focused on the Bay of Bengal,
     # Indian east coast, Bangladesh and Myanmar.
     cyclone_map.fit_bounds(
-        [[5.0, 78.0], [23.0, 100.0]],
+        [[3.0, 78.0], [23.5, 95.0]],
         padding=(20, 20)
     )
 
@@ -1371,7 +1371,6 @@ if (
 
     folium.Marker(
         [current_lat, current_lon],
-        tooltip="Latest observed cyclone position",
         popup=current_popup,
         icon=folium.DivIcon(
             html="""
@@ -1416,7 +1415,6 @@ if (
 
         folium.Marker(
             lstm_point,
-            tooltip="LSTM predicted position — 12 hours ahead",
             popup=folium.Popup(
                 f"""
                 <div style="font-family:Arial; min-width:180px;">
@@ -1479,7 +1477,6 @@ if (
 
         folium.Marker(
             tcn_point,
-            tooltip="TCN predicted landfall",
             popup=folium.Popup(
                 f"""
                 <div style="font-family:Arial; min-width:180px;">
