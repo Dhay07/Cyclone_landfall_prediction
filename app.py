@@ -56,7 +56,17 @@ except ImportError as exc:
 
 from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
+from google_sheets_api import send_to_google_sheets
 
+if st.sidebar.button("Test Google Sheets connection"):
+    try:
+        result = send_to_google_sheets("ping")
+        st.sidebar.success(result["message"])
+    except Exception:
+        st.sidebar.error(
+            "Connection failed. Check your Apps Script deployment "
+            "and Streamlit Secrets."
+        )
 # ============================================================
 # 2. LOAD CONFIGURATIONS
 # ============================================================
