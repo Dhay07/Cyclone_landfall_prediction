@@ -16,18 +16,7 @@ st.set_page_config(
     page_icon="🌀",
     layout="wide"
 )
-st.markdown("""
-<style>
-div[data-testid="stPopover"] > button {
-    padding: 0px !important;
-    min-height: 10px !important;
-    min-width: 10px !important;
-    width: 10px !important;
-    height: 10px !important;
-    font-size: 12px !important;
-}
-</style>
-""", unsafe_allow_html=True)
+
 st.markdown(
     """
     <style>
@@ -143,9 +132,9 @@ def get_season(month):
 # ============================================================
 
 def add_input(label, key, explanation, **kwargs):
-    """Display a numeric input with an adjacent information popover."""
+    """Display a numeric input with a compact information popover."""
 
-    input_col, info_col = st.columns([3, 0.5])
+    input_col, info_col = st.columns([3, 0.25], gap="small")
 
     with input_col:
         value = st.number_input(
@@ -155,11 +144,24 @@ def add_input(label, key, explanation, **kwargs):
         )
 
     with info_col:
+        st.markdown("""
+            <style>
+            div[data-testid="stPopover"] > button {
+                padding: 0 !important;
+                min-height: 24px !important;
+                height: 24px !important;
+                min-width: 24px !important;
+                width: 24px !important;
+                font-size: 12px !important;
+                line-height: 1 !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
         with st.popover("ⓘ"):
             st.write(explanation)
 
     return value
-
 
 # ============================================================
 # AUTOMATED TCN FEATURE HELPERS
