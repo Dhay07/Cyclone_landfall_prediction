@@ -521,7 +521,7 @@ with content_col:
             st.metric(
                 "Selected observation date and time",
                 f"{day:02d} {month_display} {year}, 
-                {hours_display:02d}:00 UTC""
+                {hours_display:02d}:00 UTC"
             )
 
         st.divider()
