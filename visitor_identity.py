@@ -47,16 +47,17 @@ def _verify_cookie(cookie_value: str):
 
 
 def get_visitor_identity(cookie_manager):
-    """
-    Return a stable visitor ID from a signed browser cookie.
-    Create a new identity if no valid cookie exists.
-    """
+    """Load a browser cookie before creating a new visitor identity."""
 
-    # Reuse identity during Streamlit reruns in this session.
     cached_id = st.session_state.get("_verified_visitor_id")
-
     if cached_id:
         return cached_id
+
+    # Allow the browser cookie component to initialize first.
+    if not st.session_state.get("_visitor_cookie_component_ready"):
+        st.session_state["_visitor_cookie_component_ready"] = True
+        st.info("Initializing visitor identity. Please wait...")
+        st.stop()
 
     cookie_value = cookie_manager.get(COOKIE_NAME)
 
@@ -67,32 +68,29 @@ def get_visitor_identity(cookie_manager):
             st.session_state["_verified_visitor_id"] = visitor_id
             return visitor_id
 
-    # Generate a new anonymous visitor token.
+    # No valid cookie exists: create a new visitor identity.
     token = secrets.token_urlsafe(32)
-    expiry = int(time.time()) + (
-        COOKIE_LIFETIME_DAYS * 24 * 60 * 60
-    )
+    expiry = int(time.time()) + COOKIE_LIFETIME_DAYS * 24 * 60 * 60
 
     payload = f"{token}.{expiry}"
     signature = _sign(payload)
     cookie_value = f"{payload}.{signature}"
 
-    expires_at = datetime.fromtimestamp(
-        expiry,
-        tz=timezone.utc
-    )
+    expires_at = datetime.fromtimestamp(expiry, tz=timezone.utc)
 
     cookie_manager.set(
         COOKIE_NAME,
         cookie_value,
+        path="/",
+        max_age=COOKIE_LIFETIME_DAYS * 24 * 60 * 60,
         expires_at=expires_at,
-        key="set_cyclone_visitor_cookie"
+        key="set_cyclone_visitor_cookie",
+        secure=True,
+        same_site="lax",
     )
 
-    visitor_id = hashlib.sha256(
-        token.encode("utf-8")
-    ).hexdigest()
-
+    visitor_id = hashlib.sha256(token.encode("utf-8")).hexdigest()
     st.session_state["_verified_visitor_id"] = visitor_id
 
     return visitor_id
+
