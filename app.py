@@ -816,7 +816,28 @@ with content_col:
         )
         
         prediction_panel = st.container()
-    
+        # ============================================================
+        # 11. OBSERVATION, PREDICT AND RESET BUTTONS
+        # ============================================================
+
+        st.divider()
+
+        submitted = st.button(
+                    "Add Observation",
+                    type="primary",
+                    use_container_width=True
+        )
+
+        predict_clicked = st.button(
+                    "Predict",
+                    use_container_width=True
+        )
+
+        reset_clicked = st.button(
+                    "Reset",
+                    use_container_width=True
+        )
+
     # Load the coastline data once and cache it. The dataset must have a valid CRS.
     try:
         _coast_mtime = os.path.getmtime(COASTLINE_PATH) if os.path.exists(COASTLINE_PATH) else 0
@@ -827,34 +848,6 @@ with content_col:
     )
     if COASTLINE_LOAD_ERROR:
         st.warning(COASTLINE_LOAD_ERROR)
-
-
-    # ============================================================
-    # 11. OBSERVATION, PREDICT AND RESET BUTTONS
-    # ============================================================
-
-    st.divider()
-
-    add_col, predict_col, reset_col = st.columns([2, 1, 1])
-
-    with add_col:
-        submitted = st.button(
-            "Add Observation",
-            type="primary",
-            use_container_width=True
-        )
-
-    with predict_col:
-        predict_clicked = st.button(
-            "Predict",
-            use_container_width=True
-        )
-
-    with reset_col:
-        reset_clicked = st.button(
-            "Reset",
-            use_container_width=True
-        )
 
     # Keep prediction results hidden until the user clicks Predict.
     if "show_predictions" not in st.session_state:
@@ -1548,14 +1541,6 @@ if (
         height=600,
         use_container_width=True,
         returned_objects=[]
-    )
-
-    st.caption(
-        "The solid blue line shows the observed track. "
-        "T marks the LSTM position forecast 12 hours ahead; "
-        "L marks the TCN predicted landfall. "
-        "Dashed lines connect the latest observation to each "
-        "predicted endpoint and do not represent forecast trajectories."
     )
 
 # ============================================================
