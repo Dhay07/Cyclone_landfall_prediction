@@ -290,8 +290,6 @@ def show_about():
       position 12 hours ahead using the latest two consecutive
       observations.
 
-    Both models receive observations from the same input page,
-    but their inputs are prepared and processed separately.
 
     ### Data Requirements and Limitations
 
@@ -790,11 +788,7 @@ with content_col:
             """,
             unsafe_allow_html=True
         )
-
-        st.caption(
-            "Season updates automatically with the selected month. "
-            "Storm category updates automatically with wind speed."
-        )
+        
         prediction_panel = st.container()
     
     # Load the coastline data once and cache it. The dataset must have a valid CRS.
