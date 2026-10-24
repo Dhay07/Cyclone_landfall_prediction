@@ -659,11 +659,7 @@ with content_col:
             ).reset_index(drop=True)
 
             # Display a read-only history table.
-            st.dataframe(
-                observation_df,
-                use_container_width=True,
-                hide_index=True
-            )
+            st.table(observation_df)
 
         else:
             st.info("No observations have been added yet.")
