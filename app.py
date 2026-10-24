@@ -1322,11 +1322,14 @@ if (
     tcn_lon = st.session_state.get("tcn_predicted_lon")
 
     # Create map centred on the latest cyclone position
+  
     cyclone_map = folium.Map(
         location=[current_lat, current_lon],
         zoom_start=5,
-        tiles="CartoDB positron"
+        tiles="OpenStreetMap",
+        control_scale=True
     )
+
 
     # Observed cyclone track
     if len(observed_track) > 1:
