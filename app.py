@@ -1418,76 +1418,14 @@ prediction_panel = st.container()
 
 with prediction_panel:
 
-    # ========================================================
-    # LSTM TRACK PREDICTION
-    # ========================================================
-
-    st.divider()
-    st.subheader("Predicted Track 12 h Ahead")
-
-    st.caption(
-        f"Model version: {LSTM_CONFIG['model_version']}"
-    )
-
-    lat_col, lon_col = st.columns(2)
-
-    with lat_col:
-        st.metric(
-            "Predicted Latitude (DD)",
-            (
-                f"{st.session_state.lstm_predicted_lat:.4f}"
-                if st.session_state.lstm_predicted_lat is not None
-                else "—"
-            )
-        )
-
-    with lon_col:
-        st.metric(
-            "Predicted Longitude (DD)",
-            (
-                f"{st.session_state.lstm_predicted_lon:.4f}"
-                if st.session_state.lstm_predicted_lon is not None
-                else "—"
-            )
-        )
+    left_col, right_col = st.columns([1, 1], gap="large")
 
     # ========================================================
-    # TCN LANDFALL PREDICTION
+    # LEFT COLUMN: OBSERVATION HISTORY
     # ========================================================
 
-    st.divider()
-    st.subheader("Predicted Landfall")
+    with left_col:
 
-    st.caption(
-        f"Model version: {TCN_CONFIG['model_version']}"
-    )
-
-    lat_col, lon_col = st.columns(2)
-
-    with lat_col:
-        st.metric(
-            "Landfall Latitude (DD)",
-            (
-                f"{st.session_state.tcn_predicted_lat:.4f}"
-                if st.session_state.tcn_predicted_lat is not None
-                else "—"
-            )
-        )
-
-    with lon_col:
-        st.metric(
-            "Landfall Longitude (DD)",
-            (
-                f"{st.session_state.tcn_predicted_lon:.4f}"
-                if st.session_state.tcn_predicted_lon is not None
-                else "—"
-            )
-        )
-
-    # ============================================================
-    # 12. DISPLAY SHARED OBSERVATION HISTORY
-    # ============================================================
-        st.divider()
         st.subheader("Observation History")
 
         # Use LSTM history to avoid displaying duplicate observations.
@@ -1496,7 +1434,6 @@ with prediction_panel:
         if lstm_history is not None and len(lstm_history) > 0:
             observation_df = pd.DataFrame(lstm_history).copy()
 
-            # Convert stored model time (e.g., 600.0) to HH:MM.
             def format_observation_time(value):
                 if pd.isna(value):
                     return None
@@ -1521,26 +1458,87 @@ with prediction_panel:
                 "Lat", "Lon", "WS", "CP"
             ]
 
-            # Ensure all requested columns exist.
             for col in display_columns:
                 if col not in observation_df.columns:
                     observation_df[col] = None
 
             observation_df = observation_df[display_columns]
 
-            # Sort observations chronologically.
             observation_df = observation_df.sort_values(
                 by=["Year", "Month", "Day", "Time"],
                 kind="stable",
                 na_position="last"
             ).reset_index(drop=True)
 
-            # Display a read-only history table.
             st.table(observation_df)
 
         else:
             st.info("No observations have been added yet.")
-            
+
+    # ========================================================
+    # RIGHT COLUMN: PREDICTED TRACK AND LANDFALL
+    # ========================================================
+
+    with right_col:
+
+        st.subheader("Predicted Track 12 h Ahead")
+
+        st.caption(
+            f"Model version: {LSTM_CONFIG['model_version']}"
+        )
+
+        lat_col, lon_col = st.columns(2)
+
+        with lat_col:
+            st.metric(
+                "Predicted Latitude (DD)",
+                (
+                    f"{st.session_state.lstm_predicted_lat:.4f}"
+                    if st.session_state.lstm_predicted_lat is not None
+                    else "—"
+                )
+            )
+
+        with lon_col:
+            st.metric(
+                "Predicted Longitude (DD)",
+                (
+                    f"{st.session_state.lstm_predicted_lon:.4f}"
+                    if st.session_state.lstm_predicted_lon is not None
+                    else "—"
+                )
+            )
+
+        st.divider()
+
+        st.subheader("Predicted Landfall")
+
+        st.caption(
+            f"Model version: {TCN_CONFIG['model_version']}"
+        )
+
+        lat_col, lon_col = st.columns(2)
+
+        with lat_col:
+            st.metric(
+                "Landfall Latitude (DD)",
+                (
+                    f"{st.session_state.tcn_predicted_lat:.4f}"
+                    if st.session_state.tcn_predicted_lat is not None
+                    else "—"
+                )
+            )
+
+        with lon_col:
+            st.metric(
+                "Landfall Longitude (DD)",
+                (
+                    f"{st.session_state.tcn_predicted_lon:.4f}"
+                    if st.session_state.tcn_predicted_lon is not None
+                    else "—"
+                )
+            )
+
 # ============================================================
 # 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
 # ============================================================
