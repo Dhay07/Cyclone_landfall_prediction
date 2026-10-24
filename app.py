@@ -640,63 +640,6 @@ with content_col:
         }
 
     # ============================================================
-    # 12. DISPLAY SHARED OBSERVATION HISTORY
-    # ============================================================
-        st.divider()
-        st.subheader("Observation History")
-
-        # Use LSTM history to avoid displaying duplicate observations.
-        lstm_history = st.session_state.lstm_track_history
-
-        if lstm_history is not None and len(lstm_history) > 0:
-            observation_df = pd.DataFrame(lstm_history).copy()
-
-            # Convert stored model time (e.g., 600.0) to HH:MM.
-            def format_observation_time(value):
-                if pd.isna(value):
-                    return None
-
-                value = int(value)
-
-                if value == 2400:
-                    return "00:00"
-
-                hours = value // 100
-                minutes = value % 100
-                return f"{hours:02d}:{minutes:02d}"
-
-            if "hrs_corrected" in observation_df.columns:
-                observation_df["Time"] = (
-                    observation_df["hrs_corrected"]
-                    .apply(format_observation_time)
-                )
-
-            display_columns = [
-                "Day", "Month", "Year", "Time",
-                "Lat", "Lon", "WS", "CP"
-            ]
-
-            # Ensure all requested columns exist.
-            for col in display_columns:
-                if col not in observation_df.columns:
-                    observation_df[col] = None
-
-            observation_df = observation_df[display_columns]
-
-            # Sort observations chronologically.
-            observation_df = observation_df.sort_values(
-                by=["Year", "Month", "Day", "Time"],
-                kind="stable",
-                na_position="last"
-            ).reset_index(drop=True)
-
-            # Display a read-only history table.
-            st.table(observation_df)
-
-        else:
-            st.info("No observations have been added yet.")
-
-    # ============================================================
     # RIGHT COLUMN: SEASON AND STORM CATEGORY BILLBOARDS
     # ============================================================
 
@@ -1541,6 +1484,63 @@ with prediction_panel:
             )
         )
 
+    # ============================================================
+    # 12. DISPLAY SHARED OBSERVATION HISTORY
+    # ============================================================
+        st.divider()
+        st.subheader("Observation History")
+
+        # Use LSTM history to avoid displaying duplicate observations.
+        lstm_history = st.session_state.lstm_track_history
+
+        if lstm_history is not None and len(lstm_history) > 0:
+            observation_df = pd.DataFrame(lstm_history).copy()
+
+            # Convert stored model time (e.g., 600.0) to HH:MM.
+            def format_observation_time(value):
+                if pd.isna(value):
+                    return None
+
+                value = int(value)
+
+                if value == 2400:
+                    return "00:00"
+
+                hours = value // 100
+                minutes = value % 100
+                return f"{hours:02d}:{minutes:02d}"
+
+            if "hrs_corrected" in observation_df.columns:
+                observation_df["Time"] = (
+                    observation_df["hrs_corrected"]
+                    .apply(format_observation_time)
+                )
+
+            display_columns = [
+                "Day", "Month", "Year", "Time",
+                "Lat", "Lon", "WS", "CP"
+            ]
+
+            # Ensure all requested columns exist.
+            for col in display_columns:
+                if col not in observation_df.columns:
+                    observation_df[col] = None
+
+            observation_df = observation_df[display_columns]
+
+            # Sort observations chronologically.
+            observation_df = observation_df.sort_values(
+                by=["Year", "Month", "Day", "Time"],
+                kind="stable",
+                na_position="last"
+            ).reset_index(drop=True)
+
+            # Display a read-only history table.
+            st.table(observation_df)
+
+        else:
+            st.info("No observations have been added yet.")
+            
 # ============================================================
 # 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
 # ============================================================
