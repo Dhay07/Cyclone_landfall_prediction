@@ -16,7 +16,18 @@ st.set_page_config(
     page_icon="🌀",
     layout="wide"
 )
-
+st.markdown("""
+<style>
+div[data-testid="stPopover"] > button {
+    padding: 0px !important;
+    min-height: 22px !important;
+    min-width: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 12px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 st.markdown(
     """
     <style>
