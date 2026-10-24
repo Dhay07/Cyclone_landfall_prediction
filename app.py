@@ -862,7 +862,7 @@ with content_col:
             st.session_state.show_predictions = False
             st.warning(
                 f"Add at least {lstm_min_observations} observations before "
-                "generating track prediction."
+                "generating predictions."
             )
         elif len(st.session_state.tcn_track_history) < tcn_min_observations:
             st.session_state.show_predictions = False
@@ -897,8 +897,50 @@ with content_col:
                 st.session_state.tcn_predicted_lon = (
                     tcn_result["predicted_landfall_lon"]
                 )
-
+                
                 st.session_state.show_predictions = True
+
+                # ----------------------------------------------------
+                # Save successful predictions to Google Sheets
+                # ----------------------------------------------------
+                prediction_payload = {
+                    "prediction_id": uuid.uuid4().hex,
+                    "visitor_id": visitor_id,
+                    "track_id": st.session_state.track_id,
+                    "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                    "observation_count": len(st.session_state.lstm_track_history),
+                    "lstm_output": {
+                        "predicted_lat": float(lstm_result["predicted_lat"]),
+                        "predicted_lon": float(lstm_result["predicted_lon"]),
+                    },
+                    "tcn_output": {
+                        "predicted_landfall_lat": float(
+                            tcn_result["predicted_landfall_lat"]
+                        ),
+                        "predicted_landfall_lon": float(
+                            tcn_result["predicted_landfall_lon"]
+                        ),
+                    },
+                    "model_versions": {
+                        "lstm": LSTM_CONFIG.get("model_version", "unknown"),
+                        "tcn": TCN_CONFIG.get("model_version", "unknown"),
+                    },
+                    "status": "success",
+                }
+
+                try:
+                    send_to_google_sheets(
+                        "save_prediction",
+                        prediction_payload
+                    )
+                    st.success("Predictions saved successfully.")
+                except Exception as save_error:
+                    st.warning(
+                        "Predictions were generated, but could not be saved "
+                        "to Google Sheets."
+                    )
+                    st.exception(save_error)
+
 
             except Exception as e:
                 st.session_state.show_predictions = False
