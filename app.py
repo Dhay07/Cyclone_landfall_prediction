@@ -1409,7 +1409,7 @@ with map_col:
 
         st_folium(
             cyclone_map,
-            height=480,
+            height=510,
             use_container_width=True,
             returned_objects=[]
         )
