@@ -1362,8 +1362,8 @@ if (
         <div style="font-family:Arial; min-width:180px;">
             <b style="color:#1976D2;">🌀 Current Cyclone Position</b>
             <hr style="margin:6px 0;">
-            Latitude: {current_lat:.4f}°<br>
-            Longitude: {current_lon:.4f}°
+            Latitude: {current_lat:.4f}<br>
+            Longitude: {current_lon:.4f}
         </div>
         """,
         max_width=280
@@ -1425,8 +1425,8 @@ if (
                     </b>
                     <br><small>12 hours ahead</small>
                     <hr style="margin:6px 0;">
-                    Latitude: {lstm_lat:.4f}°<br>
-                    Longitude: {lstm_lon:.4f}°
+                    Latitude: {lstm_lat:.4f}<br>
+                    Longitude: {lstm_lon:.4f}
                 </div>
                 """,
                 max_width=280
@@ -1445,7 +1445,7 @@ if (
                     font-weight:bold;
                     font-size:12px;
                     box-shadow:0 1px 4px #777;
-                ">L</div>
+                ">T</div>
                 """,
                 icon_size=(25, 25),
                 icon_anchor=(12, 12)
@@ -1507,7 +1507,7 @@ if (
                     font-weight:bold;
                     font-size:12px;
                     box-shadow:0 1px 4px #777;
-                ">T</div>
+                ">L</div>
                 """,
                 icon_size=(25, 25),
                 icon_anchor=(12, 12)
@@ -1526,7 +1526,7 @@ if (
         bottom: 25px;
         left: 25px;
         z-index: 9999;
-        background: white;
+        background: black;
         padding: 10px 13px;
         border: 1px solid #bbb;
         border-radius: 7px;
@@ -1565,8 +1565,8 @@ if (
 
     st.caption(
         "The solid blue line shows the observed track. "
-        "L marks the LSTM position forecast 12 hours ahead; "
-        "T marks the TCN predicted landfall. "
+        "T marks the LSTM position forecast 12 hours ahead; "
+        "L marks the TCN predicted landfall. "
         "Dashed lines connect the latest observation to each "
         "predicted endpoint and do not represent forecast trajectories."
     )
