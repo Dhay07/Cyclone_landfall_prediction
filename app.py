@@ -837,21 +837,51 @@ with content_col:
         st.session_state.show_predictions = False
 
     # Reset both model histories and all associated timestamps.
+
     if reset_clicked:
-        st.session_state.tcn_track_history = []
-        st.session_state.lstm_track_history = []
+        # Clear this visitor's saved observations and predictions first.
+        try:
+            result = send_to_google_sheets(
+                "clear_visitor_data",
+                {"visitor_id": visitor_id}
+            )
 
-        st.session_state.tcn_first_observation_datetime = None
-        st.session_state.tcn_last_observation_datetime = None
+            if result.get("ok"):
+                # Clear local observation histories.
+                st.session_state.tcn_track_history = []
+                st.session_state.lstm_track_history = []
 
-    # Clear prediction values.
-        st.session_state.lstm_predicted_lat = None
-        st.session_state.lstm_predicted_lon = None
-        st.session_state.tcn_predicted_lat = None
-        st.session_state.tcn_predicted_lon = None
+                # Clear observation timestamps.
+                st.session_state.tcn_first_observation_datetime = None
+                st.session_state.tcn_last_observation_datetime = None
 
-        st.session_state.show_predictions = False
-        st.rerun()
+                # Clear prediction outputs.
+                st.session_state.lstm_predicted_lat = None
+                st.session_state.lstm_predicted_lon = None
+                st.session_state.tcn_predicted_lat = None
+                st.session_state.tcn_predicted_lon = None
+                st.session_state.show_predictions = False
+
+                # Start a new track.
+                st.session_state.track_id = uuid.uuid4().hex
+
+                st.success(
+                    "Your observations and predictions have been cleared."
+                )
+                st.rerun()
+
+            else:
+                st.error(
+                    "Reset failed. Your saved data has not been cleared."
+                )
+
+        except Exception as exc:
+            st.error(
+                "Could not clear your saved data from Google Sheets. "
+                "Your local history has not been reset."
+            )
+            st.exception(exc)
+
 
     # A prediction is requested only when the Predict button is clicked.
     if predict_clicked:
