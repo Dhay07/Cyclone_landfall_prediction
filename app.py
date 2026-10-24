@@ -62,11 +62,11 @@ if st.sidebar.button("Test Google Sheets connection"):
     try:
         result = send_to_google_sheets("ping")
         st.sidebar.success(result["message"])
-    except Exception:
-        st.sidebar.error(
-            "Connection failed. Check your Apps Script deployment "
-            "and Streamlit Secrets."
-        )
+
+    except Exception as e:
+        st.sidebar.error(f"Error type: {type(e).__name__}")
+        st.sidebar.code(str(e))
+
 # ============================================================
 # 2. LOAD CONFIGURATIONS
 # ============================================================
