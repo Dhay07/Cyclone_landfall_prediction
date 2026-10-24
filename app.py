@@ -610,9 +610,6 @@ with content_col:
     # ============================================================
     # 12. DISPLAY SHARED OBSERVATION HISTORY
     # ============================================================
-        # ============================================================
-        # OBSERVATION HISTORY
-        # ============================================================
         st.divider()
         st.subheader("Observation History")
 
@@ -1043,9 +1040,54 @@ with content_col:
                 "season": season
             }
 
+
             # ----------------------------------------------------
             # 9. Save observations only after validation succeeds
             # ----------------------------------------------------
+
+            # Prepare a unique ID for this observation.
+            record_id = uuid.uuid4().hex
+
+            observation_payload = {
+                "record_id": record_id,
+                "visitor_id": visitor_id,
+                "track_id": st.session_state.track_id,
+                "timestamp_utc": (
+                    observation_dt.replace(tzinfo=timezone.utc).isoformat()
+                ),
+                "latitude": lat,
+                "longitude": lon,
+                "wind_speed_knots": ws,
+                "central_pressure_hpa": cp,
+                "days_after_monsoon_onset": days_monsoon,
+                "season": season,
+                "storm_grade": gradeno,
+                "hrs_corrected": hrs_corrected,
+                "derived_features": {
+                    "tcn_observation": tcn_observation,
+                    "lstm_observation": lstm_observation,
+                },
+                "model_versions": {
+                    "tcn": TCN_CONFIG.get("model_version", "unknown"),
+                    "lstm": LSTM_CONFIG.get("model_version", "unknown"),
+                },
+            }
+
+            # Save to Google Sheets BEFORE updating session history.
+            try:
+                send_to_google_sheets(
+                    "save_observation",
+                    observation_payload
+                )
+            except Exception as exc:
+                st.error(
+                    "Could not save this observation to Google Sheets. "
+                    "Your observation history has not been updated."
+                )
+                st.exception(exc)
+                st.stop()
+
+            # Update session history only after the save succeeds.
             if first_dt is None:
                 st.session_state.tcn_first_observation_datetime = observation_dt
 
