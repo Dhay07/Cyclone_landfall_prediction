@@ -815,7 +815,6 @@ with content_col:
             unsafe_allow_html=True
         )
         
-        prediction_panel = st.container()
         # ============================================================
         # 11. OBSERVATION, PREDICT AND RESET BUTTONS
         # ============================================================
@@ -1469,7 +1468,7 @@ if (
         use_container_width=True,
         returned_objects=[]
     )
-
+prediction_panel = st.container()
 # ============================================================
 # MODEL PREDICTIONS — DISPLAY BELOW THE RIGHT-SIDE BILLBOARDS
 # ============================================================
@@ -1541,7 +1540,7 @@ with prediction_panel:
                 else "—"
             )
         )
-        
+
 # ============================================================
 # 16. FOOTER: ABOUT, CONTACT, EXTERNAL LINKS AND DISCLAIMER
 # ============================================================
