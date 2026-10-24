@@ -58,14 +58,17 @@ from predict_tcn import predict_landfall as predict_tcn
 from predict_lstm import predict_landfall as predict_lstm
 from google_sheets_api import send_to_google_sheets
 
-if st.sidebar.button("Test Google Sheets connection"):
-    try:
-        result = send_to_google_sheets("ping")
-        st.sidebar.success(result["message"])
 
-    except Exception as e:
-        st.sidebar.error(f"Error type: {type(e).__name__}")
-        st.sidebar.code(str(e))
+import extra_streamlit_components as stx
+from visitor_identity import get_visitor_identity
+
+cookie_manager = stx.CookieManager(key="cyclone_cookie_manager")
+
+visitor_id = get_visitor_identity(cookie_manager)
+
+st.sidebar.caption("Anonymous visitor identity test")
+st.sidebar.code(visitor_id[:12] + "...")
+
 
 # ============================================================
 # 2. LOAD CONFIGURATIONS
