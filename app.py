@@ -519,10 +519,10 @@ with content_col:
 
         with selected_date_col:
             st.metric(
-                "Selected observation date",
-                f"{day:02d} {month_display} {year}"
+                "Selected observation date and time",
+                f"{day:02d} {month_display} {year}, 
+                {hours_display:02d}:00 UTC""
             )
-            st.caption(f"Observation time: {hours_display:02d}:00 UTC")
 
         st.divider()
 
