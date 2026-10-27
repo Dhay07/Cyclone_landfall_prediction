@@ -1505,8 +1505,6 @@ with info_col:
                 )
             )
 
-        st.divider()
-
         st.subheader("Predicted Landfall")
 
         st.caption(
