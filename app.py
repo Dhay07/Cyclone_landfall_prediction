@@ -557,7 +557,7 @@ with content_col:
             )
         st.caption(
             "IST = UTC + 5 h 30 min. Refer "
-            "[IMD bulletin](https://rsmcnewdelhi.imd.gov.in/archive-information.php?internal_menu=Mw%3D%3D&menu_id=NA%3D%3D)."
+            "[IMD bulletin](https://rsmcnewdelhi.imd.gov.in/archive-information.php?internal_menu=Mw%3D%3D&menu_id=NA%3D%3D)"
             " to enter observations"        
         )
         st.divider()
