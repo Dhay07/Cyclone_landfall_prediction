@@ -555,7 +555,10 @@ with content_col:
                 "Selected observation date and time",
                 f"{day:02d} {month_display} {year}, {hours_display:02d}:00 UTC"
             )
-
+        st.caption(
+            "IST = UTC + 5 h 30 min. Enter observations based on "
+            "[IMD bulletin](https://rsmcnewdelhi.imd.gov.in/archive-information.php?internal_menu=Mw%3D%3D&menu_id=NA%3D%3D)."
+        )
         st.divider()
 
         st.subheader("Cyclone Parameters")
