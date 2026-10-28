@@ -1415,7 +1415,7 @@ with map_col:
 
         st_folium(
             cyclone_map,
-            height=500,
+            height=700,
             use_container_width=True,
             returned_objects=[],
             key=f"cyclone_map_{st.session_state.map_render_version}"
