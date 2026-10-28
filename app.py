@@ -798,8 +798,9 @@ with content_col:
     # Keep prediction results hidden until the user clicks Predict.
     if "show_predictions" not in st.session_state:
         st.session_state.show_predictions = False
+    
     if "map_render_version" not in st.session_state:
-    st.session_state.map_render_version = 0
+        st.session_state.map_render_version = 0
 
     # Reset both model histories and all associated timestamps.
 
