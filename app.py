@@ -1200,7 +1200,8 @@ with map_col:
             location=[15.0, 88.0],
             zoom_start=5,
             tiles="OpenStreetMap",
-            control_scale=True
+            control_scale=True,
+            height=700
         )
 
         # Keep the regional view focused on the Bay of Bengal,
