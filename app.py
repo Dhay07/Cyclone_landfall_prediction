@@ -1429,7 +1429,7 @@ with map_col:
             height=500,
             use_container_width=True,
             returned_objects=[],
-            key=f"cyclone_map_{st.session_state.map_render_version}"
+            key="cyclone_track_map"
         )
 
 # ============================================================
