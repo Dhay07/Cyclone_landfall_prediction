@@ -1210,6 +1210,8 @@ with map_col:
         cyclone_map = folium.Map(
             location=[15.0, 88.0],
             zoom_start=5,
+            min_zoom=4,
+            max_zoom=10,
             tiles="OpenStreetMap",
             control_scale=True
         )
