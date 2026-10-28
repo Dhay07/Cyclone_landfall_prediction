@@ -366,9 +366,10 @@ if "tcn_track_history" not in st.session_state:
 
 if "lstm_track_history" not in st.session_state:
     st.session_state.lstm_track_history = []
-
 if "observation_record_ids" not in st.session_state:
     st.session_state.observation_record_ids = []
+if "observation_datetimes" not in st.session_state:
+    st.session_state.observation_datetimes = []
 if "lstm_predicted_lat" not in st.session_state:
     st.session_state.lstm_predicted_lat = None
 
@@ -427,8 +428,8 @@ if "_observations_loaded_for_visitor" not in st.session_state:
 
             restored_tcn = []
             restored_lstm = []
-            restored_datetimes = []
             restored_record_ids = []
+            restored_datetimes = []
 
             for record in active_records:
                 derived_text = record.get("derived_features_json", "{}")
@@ -456,6 +457,7 @@ if "_observations_loaded_for_visitor" not in st.session_state:
             st.session_state.tcn_track_history = restored_tcn
             st.session_state.lstm_track_history = restored_lstm
             st.session_state.observation_record_ids = restored_record_ids
+            st.session_state.observation_datetimes = restored_datetimes
 
             if restored_datetimes:
                 st.session_state.tcn_first_observation_datetime = (
@@ -823,6 +825,7 @@ with content_col:
                 st.session_state.tcn_track_history = []
                 st.session_state.lstm_track_history = []
                 st.session_state.observation_record_ids = []
+                st.session_state.observation_datetimes = []
 
                 # Clear observation timestamps.
                 st.session_state.tcn_first_observation_datetime = None
@@ -1142,7 +1145,7 @@ with content_col:
             st.session_state.tcn_track_history.append(tcn_observation)
             st.session_state.lstm_track_history.append(lstm_observation)
             st.session_state.observation_record_ids.append(record_id)
-
+            st.session_state.observation_datetimes.append(observation_dt)
 
             st.session_state.lstm_predicted_lat = None
             st.session_state.lstm_predicted_lon = None
@@ -1485,317 +1488,38 @@ with info_col:
 
             st.table(observation_df)
 
-            # Only the latest observation in the active track can be edited or deleted.
-            latest_index = len(st.session_state.lstm_track_history) - 1
-            latest_lstm = st.session_state.lstm_track_history[latest_index]
-            latest_tcn = st.session_state.tcn_track_history[latest_index]
-            latest_record_id = (
-                st.session_state.observation_record_ids[latest_index]
-                if latest_index < len(st.session_state.observation_record_ids)
-                else ""
-            )
-
-            st.markdown("#### Manage Latest Observation")
-            st.caption(
-                "Only the most recent observation can be edited or deleted. "
-                "Earlier observations are retained to preserve the track history."
-            )
-
-            if not latest_record_id:
-                st.warning(
-                    "The record ID for the latest observation is unavailable. "
-                    "Refresh the app to restore the saved record before editing or deleting."
-                )
-            else:
-                with st.expander("Edit latest observation", expanded=False):
-                    with st.form("edit_latest_observation_form"):
-                        edit_date_col1, edit_date_col2, edit_date_col3 = st.columns(3)
-
-                        with edit_date_col1:
-                            edit_year = st.selectbox(
-                                "Year (UTC)",
-                                options=list(range(1990, CURRENT_YEAR + 1)),
-                                index=max(
-                                    0,
-                                    min(
-                                        list(range(1990, CURRENT_YEAR + 1)).index(
-                                            int(latest_lstm["Year"])
-                                        ) if int(latest_lstm["Year"]) in range(1990, CURRENT_YEAR + 1) else 0,
-                                        len(list(range(1990, CURRENT_YEAR + 1))) - 1
-                                    )
-                                ),
-                                key="edit_obs_year"
-                            )
-
-                        with edit_date_col2:
-                            edit_month = st.selectbox(
-                                "Month (UTC)",
-                                options=list(range(1, 13)),
-                                format_func=lambda m: MONTH_NAMES[m - 1],
-                                index=int(latest_lstm["Month"]) - 1,
-                                key="edit_obs_month"
-                            )
-
-                        with edit_date_col3:
-                            edit_max_day = calendar.monthrange(edit_year, edit_month)[1]
-                            edit_day = st.selectbox(
-                                "Day (UTC)",
-                                options=list(range(1, edit_max_day + 1)),
-                                index=min(int(latest_lstm["Day"]) - 1, edit_max_day - 1),
-                                key="edit_obs_day"
-                            )
-
-                        edit_time_col, _ = st.columns(2)
-                        with edit_time_col:
-                            current_hour = (
-                                0 if int(latest_lstm.get("hrs_corrected", 600)) == 2400
-                                else int(latest_lstm.get("hrs_corrected", 600)) // 100
-                            )
-                            edit_hour = st.selectbox(
-                                "Time (UTC)",
-                                options=[0, 6, 12, 18],
-                                index=[0, 6, 12, 18].index(current_hour)
-                                if current_hour in [0, 6, 12, 18] else 1,
-                                format_func=lambda h: f"{h:02d}:00",
-                                key="edit_obs_hour"
-                            )
-
-                        edit_col1, edit_col2 = st.columns(2)
-                        with edit_col1:
-                            edit_lat = st.number_input(
-                                "Latitude (DD)",
-                                min_value=-90.0, max_value=90.0,
-                                value=float(latest_lstm["Lat"]),
-                                format="%.4f", key="edit_obs_lat"
-                            )
-                            edit_lon = st.number_input(
-                                "Longitude (DD)",
-                                min_value=-180.0, max_value=180.0,
-                                value=float(latest_lstm["Lon"]),
-                                format="%.4f", key="edit_obs_lon"
-                            )
-                            edit_ws = st.number_input(
-                                "Wind Speed (knots)",
-                                min_value=0.0, value=float(latest_lstm["WS"]),
-                                format="%.4f", key="edit_obs_ws"
-                            )
-                        with edit_col2:
-                            edit_cp = st.number_input(
-                                "Central Pressure (hPa)",
-                                min_value=0.0, value=float(latest_lstm["CP"]),
-                                format="%.4f", key="edit_obs_cp"
-                            )
-                            edit_days_monsoon = st.number_input(
-                                "Days After Monsoon Onset",
-                                value=float(latest_tcn.get("daysaftermonsoon", 0.0)),
-                                format="%.4f", key="edit_obs_days_monsoon"
-                            )
-
-                        edit_submitted = st.form_submit_button(
-                            "Save Changes", type="primary", use_container_width=True
-                        )
-
-                delete_col1, delete_col2 = st.columns([1, 2])
-                with delete_col1:
-                    confirm_delete = st.checkbox(
-                        "Confirm deletion", key="confirm_delete_latest"
+            # Delete only the latest observation row.
+            if st.button("🗑️ Delete last observation", key="delete_last_observation"):
+                record_ids = st.session_state.observation_record_ids
+                if not record_ids or not record_ids[-1]:
+                    st.error(
+                        "The last observation's record ID is unavailable. "
+                        "Refresh the app and try again."
                     )
-                with delete_col2:
-                    delete_clicked = st.button(
-                        "Delete Latest Observation",
-                        type="secondary",
-                        use_container_width=True,
-                        disabled=not confirm_delete
-                    )
-
-                if edit_submitted:
-                    try:
-                        edited_dt = datetime(
-                            int(edit_year), int(edit_month), int(edit_day),
-                            hour=int(edit_hour)
-                        )
-                        previous_dt = (
-                            st.session_state.tcn_last_observation_datetime
-                        )
-                        if len(st.session_state.tcn_track_history) > 1:
-                            previous_tcn = st.session_state.tcn_track_history[-2]
-                            previous_lstm = st.session_state.lstm_track_history[-2]
-                            previous_dt = datetime(
-                                int(previous_lstm["Year"]),
-                                int(previous_lstm["Month"]),
-                                int(previous_lstm["Day"]),
-                                hour=(
-                                    0 if int(previous_lstm["hrs_corrected"]) == 2400
-                                    else int(previous_lstm["hrs_corrected"]) // 100
-                                )
-                            )
-                            elapsed_hours = (edited_dt - previous_dt).total_seconds() / 3600.0
-                            if elapsed_hours != 6:
-                                st.error(
-                                    "The edited timestamp must remain exactly 6 hours "
-                                    "after the previous observation."
-                                )
-                                st.stop()
-                        elif len(st.session_state.tcn_track_history) == 1:
-                            # With a single observation, no preceding interval applies.
-                            previous_tcn = None
-                            previous_lstm = None
-                        else:
-                            previous_tcn = None
-                            previous_lstm = None
-
-                        edited_season = get_season(int(edit_month))
-                        if 17 <= edit_ws <= 27:
-                            edited_grade = 1
-                        elif 28 <= edit_ws <= 33:
-                            edited_grade = 2
-                        elif 34 <= edit_ws <= 47:
-                            edited_grade = 3
-                        elif 48 <= edit_ws <= 63:
-                            edited_grade = 4
-                        elif 64 <= edit_ws <= 89:
-                            edited_grade = 5
-                        elif 90 <= edit_ws <= 119:
-                            edited_grade = 6
-                        elif edit_ws >= 120:
-                            edited_grade = 7
-                        else:
-                            edited_grade = 0
-
-                        if previous_tcn is not None:
-                            edited_direction = calculate_bearing(
-                                float(previous_tcn["Lat"]), float(previous_tcn["Lon"]),
-                                float(edit_lat), float(edit_lon)
-                            )
-                        else:
-                            edited_direction = 0.0
-
-                        if len(st.session_state.lstm_track_history) == 1:
-                            first_dt = edited_dt
-                            edited_duration = 0.0
-                        else:
-                            first_lstm = st.session_state.lstm_track_history[0]
-                            first_dt = datetime(
-                                int(first_lstm["Year"]),
-                                int(first_lstm["Month"]),
-                                int(first_lstm["Day"]),
-                                hour=(
-                                    0 if int(first_lstm["hrs_corrected"]) == 2400
-                                    else int(first_lstm["hrs_corrected"]) // 100
-                                )
-                            )
-                            edited_duration = (
-                                edited_dt - first_dt
-                            ).total_seconds() / 3600.0
-                        nearest_lat, nearest_lon, distance_coast = find_nearest_coast(
-                            float(edit_lat), float(edit_lon), COASTLINE_GDF
-                        )
-                        edited_hrs_corrected = float(
-                            2400 if edit_hour == 0 else edit_hour * 100
-                        )
-
-                        edited_tcn = {
-                            "Lat": float(edit_lat),
-                            "Lon": float(edit_lon),
-                            "direction_from_previous": float(edited_direction),
-                            "WS": float(edit_ws),
-                            "CP": float(edit_cp),
-                            "Month": int(edit_month),
-                            "Day": int(edit_day),
-                            "hrs_corrected": edited_hrs_corrected,
-                            "Duration": float(edited_duration),
-                            "Season": int(edited_season),
-                            "Nearest_lat": float(nearest_lat),
-                            "Nearest_lon": float(nearest_lon),
-                            "Distance_to_nearest_coast_km": float(distance_coast),
-                            "daysaftermonsoon": float(edit_days_monsoon)
-                        }
-                        edited_lstm = {
-                            "Lat": float(edit_lat),
-                            "Lon": float(edit_lon),
-                            "CP": float(edit_cp),
-                            "WS": float(edit_ws),
-                            "Year": int(edit_year),
-                            "Month": int(edit_month),
-                            "Day": int(edit_day),
-                            "hrs_corrected": edited_hrs_corrected,
-                            "Gradeno": int(edited_grade),
-                            "season": int(edited_season)
-                        }
-                        edited_payload = {
-                            "record_id": latest_record_id,
-                            "visitor_id": visitor_id,
-                            "track_id": st.session_state.track_id,
-                            "timestamp_utc": edited_dt.replace(tzinfo=timezone.utc).isoformat(),
-                            "latitude": float(edit_lat),
-                            "longitude": float(edit_lon),
-                            "wind_speed_knots": float(edit_ws),
-                            "central_pressure_hpa": float(edit_cp),
-                            "days_after_monsoon_onset": float(edit_days_monsoon),
-                            "season": int(edited_season),
-                            "storm_grade": int(edited_grade),
-                            "hrs_corrected": edited_hrs_corrected,
-                            "derived_features": {
-                                "tcn_observation": edited_tcn,
-                                "lstm_observation": edited_lstm
-                            },
-                            "model_versions": {
-                                "tcn": TCN_CONFIG.get("model_version", "unknown"),
-                                "lstm": LSTM_CONFIG.get("model_version", "unknown")
-                            }
-                        }
-
-                        send_to_google_sheets("update_observation", edited_payload)
-
-                        st.session_state.tcn_track_history[-1] = edited_tcn
-                        st.session_state.lstm_track_history[-1] = edited_lstm
-                        st.session_state.tcn_first_observation_datetime = (
-                            first_dt if len(st.session_state.tcn_track_history) > 1 else edited_dt
-                        )
-                        st.session_state.tcn_last_observation_datetime = edited_dt
-                        st.session_state.lstm_predicted_lat = None
-                        st.session_state.lstm_predicted_lon = None
-                        st.session_state.tcn_predicted_lat = None
-                        st.session_state.tcn_predicted_lon = None
-                        st.session_state.show_predictions = False
-                        st.session_state.map_render_version += 1
-                        st.success("Latest observation updated. Please run Predict again.")
-                        st.rerun()
-                    except Exception as exc:
-                        st.error(f"Could not update the latest observation: {exc}")
-
-                if delete_clicked:
+                else:
                     try:
                         send_to_google_sheets(
                             "delete_observation",
                             {
-                                "record_id": latest_record_id,
+                                "record_id": record_ids[-1],
                                 "visitor_id": visitor_id,
-                                "track_id": st.session_state.track_id
-                            }
+                                "track_id": st.session_state.track_id,
+                            },
                         )
+
                         st.session_state.tcn_track_history.pop()
                         st.session_state.lstm_track_history.pop()
                         st.session_state.observation_record_ids.pop()
+                        if st.session_state.observation_datetimes:
+                            st.session_state.observation_datetimes.pop()
 
-                        if st.session_state.lstm_track_history:
-                            first_lstm = st.session_state.lstm_track_history[0]
-                            last_lstm = st.session_state.lstm_track_history[-1]
-                            st.session_state.tcn_first_observation_datetime = datetime(
-                                int(first_lstm["Year"]), int(first_lstm["Month"]),
-                                int(first_lstm["Day"]),
-                                hour=(0 if int(first_lstm["hrs_corrected"]) == 2400
-                                      else int(first_lstm["hrs_corrected"]) // 100)
-                            )
-                            st.session_state.tcn_last_observation_datetime = datetime(
-                                int(last_lstm["Year"]), int(last_lstm["Month"]),
-                                int(last_lstm["Day"]),
-                                hour=(0 if int(last_lstm["hrs_corrected"]) == 2400
-                                      else int(last_lstm["hrs_corrected"]) // 100)
-                            )
-                        else:
-                            st.session_state.tcn_first_observation_datetime = None
-                            st.session_state.tcn_last_observation_datetime = None
+                        remaining_datetimes = st.session_state.observation_datetimes
+                        st.session_state.tcn_first_observation_datetime = (
+                            remaining_datetimes[0] if remaining_datetimes else None
+                        )
+                        st.session_state.tcn_last_observation_datetime = (
+                            remaining_datetimes[-1] if remaining_datetimes else None
+                        )
 
                         st.session_state.lstm_predicted_lat = None
                         st.session_state.lstm_predicted_lon = None
@@ -1803,10 +1527,11 @@ with info_col:
                         st.session_state.tcn_predicted_lon = None
                         st.session_state.show_predictions = False
                         st.session_state.map_render_version += 1
-                        st.success("Latest observation deleted.")
+                        st.success("Last observation deleted.")
                         st.rerun()
-                    except Exception as exc:
-                        st.error(f"Could not delete the latest observation: {exc}")
+                    except Exception as delete_error:
+                        st.error("Could not delete the last observation.")
+                        st.exception(delete_error)
 
         else:
             st.info("No observations have been added yet.")
