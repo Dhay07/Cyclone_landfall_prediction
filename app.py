@@ -798,6 +798,8 @@ with content_col:
     # Keep prediction results hidden until the user clicks Predict.
     if "show_predictions" not in st.session_state:
         st.session_state.show_predictions = False
+    if "map_render_version" not in st.session_state:
+    st.session_state.map_render_version = 0
 
     # Reset both model histories and all associated timestamps.
 
@@ -848,6 +850,7 @@ with content_col:
 
     # A prediction is requested only when the Predict button is clicked.
     if predict_clicked:
+        st.session_state.map_render_version += 1
         lstm_min_observations = int(LSTM_CONFIG.get("window_size", 2))
         tcn_min_observations = 2
 
@@ -1169,10 +1172,7 @@ with content_col:
 map_col, info_col = st.columns([1.2, 1], gap="medium")
 
 with map_col:
-    if (
-        st.session_state.get("show_predictions", False)
-        and st.session_state.tcn_track_history
-    ):
+    if True:
         st.markdown("### 🗺️ Cyclone Track and Predicted Landfall")
 
         # Observed cyclone positions
@@ -1181,8 +1181,9 @@ with map_col:
             for obs in st.session_state.tcn_track_history
         ]
 
-        current_lat, current_lon = observed_track[-1]
-
+        current_lat, current_lon = (
+        observed_track[-1] if observed_track else (None, None)
+        )
         # Predicted landfall coordinates
         lstm_lat = st.session_state.get("lstm_predicted_lat")
         lstm_lon = st.session_state.get("lstm_predicted_lon")
@@ -1224,39 +1225,39 @@ with map_col:
         # --------------------------------------------------------
         # 3. CURRENT CYCLONE POSITION
         # --------------------------------------------------------
-
-        current_popup = folium.Popup(
-            f"""
-            <div style="font-family:Arial; min-width:180px;">
-                <b style="color:#1976D2;">🌀 Current Cyclone Position</b>
-                <hr style="margin:6px 0;">
-                Latitude: {current_lat:.4f}<br>
-                Longitude: {current_lon:.4f}
-            </div>
-            """,
-            max_width=280
-        )
-
-        folium.Marker(
-            [current_lat, current_lon],
-            popup=current_popup,
-            icon=folium.DivIcon(
-                html="""
-                <div style="
-                    font-size:27px;
-                    width:34px;
-                    height:34px;
-                    line-height:34px;
-                    text-align:center;
-                    text-shadow:1px 1px 3px white;
-                ">🌀</div>
+        if current_lat is not None and current_lon is not None:
+            current_popup = folium.Popup(
+                f"""
+                <div style="font-family:Arial; min-width:180px;">
+                    <b style="color:#1976D2;">🌀 Current Cyclone Position</b>
+                    <hr style="margin:6px 0;">
+                    Latitude: {current_lat:.4f}<br>
+                    Longitude: {current_lon:.4f}
+                </div>
                 """,
-                icon_size=(34, 34),
-                icon_anchor=(17, 17)
+                max_width=280
             )
-        ).add_to(cyclone_map)
 
-        map_points = list(observed_track)
+            folium.Marker(
+                [current_lat, current_lon],
+                popup=current_popup,
+                icon=folium.DivIcon(
+                    html="""
+                    <div style="
+                        font-size:27px;
+                        width:34px;
+                        height:34px;
+                        line-height:34px;
+                        text-align:center;
+                        text-shadow:1px 1px 3px white;
+                    ">🌀</div>
+                    """,
+                    icon_size=(34, 34),
+                    icon_anchor=(17, 17)
+                )
+            ).add_to(cyclone_map)
+
+            map_points = list(observed_track)
 
         # --------------------------------------------------------
         # 4. LSTM PREDICTED POSITION — 12 HOURS AHEAD
@@ -1415,7 +1416,8 @@ with map_col:
             cyclone_map,
             height=500,
             use_container_width=True,
-            returned_objects=[]
+            returned_objects=[],
+            key=f"cyclone_map_{st.session_state.map_render_version}"
         )
 
 # ============================================================
