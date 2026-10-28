@@ -1200,8 +1200,7 @@ with map_col:
             location=[15.0, 88.0],
             zoom_start=5,
             tiles="OpenStreetMap",
-            control_scale=True,
-            height=700
+            control_scale=True
         )
 
         # Keep the regional view focused on the Bay of Bengal,
@@ -1416,7 +1415,7 @@ with map_col:
 
         st_folium(
             cyclone_map,
-            height=700,
+            height=500,
             use_container_width=True,
             returned_objects=[],
             key=f"cyclone_map_{st.session_state.map_render_version}"
