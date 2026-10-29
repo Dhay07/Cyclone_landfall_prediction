@@ -582,7 +582,7 @@ with content_col:
                 min_value=-90.0,
                 max_value=90.0,
                 value=15.0,
-                format="%.4f"
+                format="%.3f"
             )
 
             lon = add_input(
@@ -592,14 +592,14 @@ with content_col:
                 min_value=-180.0,
                 max_value=180.0,
                 value=85.0,
-                format="%.4f"
+                format="%.3f"
             )
             days_monsoon = add_input(
                 "Days After Monsoon Onset",
                 "tcn_days_monsoon",
                 "Number of days between Kerala southwest monsoon onset and cyclone genesis. Check the official IMD website.",
                 value=0.0,
-                format="%.4f"
+                format="%d"
             )
 
         with common_col2:
@@ -609,7 +609,7 @@ with content_col:
                 "Maximum sustained wind speed at the observation time, in knots.",
                 min_value=0.0,
                 value=40.0,
-                format="%.4f"
+                format="%d"
             )            
             cp = add_input(
                 "Central Pressure (hPa)",
@@ -617,7 +617,7 @@ with content_col:
                 "Estimated minimum central pressure at the observation time, in hectopascals.",
                 min_value=0.0,
                 value=1000.0,
-                format="%.4f"
+                format="%d"
             )
 
         # Calculate cyclone grade from wind speed.
