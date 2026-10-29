@@ -594,7 +594,15 @@ with content_col:
                 value=85.0,
                 format="%.4f"
             )
+            days_monsoon = add_input(
+                "Days After Monsoon Onset",
+                "tcn_days_monsoon",
+                "Number of days between Kerala southwest monsoon onset and cyclone genesis. Check the official IMD website.",
+                value=0.0,
+                format="%.4f"
+            )
 
+        with common_col2:
             ws = add_input(
                 "Wind Speed (knots)",
                 "obs_ws",
@@ -602,23 +610,13 @@ with content_col:
                 min_value=0.0,
                 value=40.0,
                 format="%.4f"
-            )
-
-        with common_col2:
+            )            
             cp = add_input(
                 "Central Pressure (hPa)",
                 "obs_cp",
                 "Estimated minimum central pressure at the observation time, in hectopascals.",
                 min_value=0.0,
                 value=1000.0,
-                format="%.4f"
-            )
-
-            days_monsoon = add_input(
-                "Days After Monsoon Onset",
-                "tcn_days_monsoon",
-                "Number of days between Kerala southwest monsoon onset and cyclone genesis. Check the official IMD website.",
-                value=0.0,
                 format="%.4f"
             )
 
